@@ -100,6 +100,7 @@ void print_flag(t_flags *flags){
     );
 }
 
+
 // Fonction pour lister les fichiers d'un répertoire de manière itérative
 void list_directory_iterative(const char *start_path) {
     t_stack *stack = NULL;  // Pile des répertoires à explorer
