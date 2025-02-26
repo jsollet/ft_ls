@@ -1,11 +1,13 @@
 #include "../libft/includes/libft.h"
 #include "../includes/types.h"
 #include "../includes/sort.h"
+#include "../includes/dynamic_array_string.h"
 #include <errno.h>
 #include <string.h>
 #include <stdbool.h>
 #include <sys/stat.h>
 #include <dirent.h>
+//#include <sys/ioctl.h>
 
 #define MAX_PATH_LEN 1024
 
@@ -48,7 +50,7 @@ void check_files_exist(int argc, char *argv[]){
 
 }
 
-bool parse_flags(int argc, char *argv[], t_flags *flags){
+bool    parse_flags(int argc, char *argv[], t_flags *flags){
     int index = 0;
     while (index < argc){
         if (argv[index][0] == '-' && argv[index][1] != '\0'){
@@ -86,7 +88,8 @@ bool parse_flags(int argc, char *argv[], t_flags *flags){
     return true;
 }
 
-void print_flag(t_flags *flags){
+
+void    print_flag(t_flags *flags){
     ft_printf("R[%d] r[%d] a[%d] l[%d] t[%d] u[%d] f[%d] g[%d] d[%d]", 
         flags->bigR,
         flags->r,
@@ -99,10 +102,128 @@ void print_flag(t_flags *flags){
         flags->d
     );
 }
+// A voir ces 3 là et les comprendre puis les inserer
+void    init_terminal(t_term *t){
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &t->w);
+    t->term_width = t->w.ws_col;
+    t->col_width = 0;  // À définir plus tard
+    t->count = 0;
+    t->max_len = 0;
+}
 
+void    update_terminal(t_term *t, char **files, size_t file_count) {
+    t->count = file_count;
+    for (size_t i = 0; i < file_count; i++) {
+        size_t len = ft_strlen(files[i]);
+        if (len > t->max_len)
+            t->max_len = len;
+    }
+    t->col_width = t->max_len + 2;  // Ajout d'un espace pour la lisibilité
+}
+
+/* void    print_files_in_columns(char **files, t_term *t) {
+    int cols = t->term_width / t->col_width;
+    if (cols == 0) cols = 1;  // Sécurité pour éviter une division par zéro
+
+    for (size_t i = 0; i < t->count; i++) {
+        printf("%-*s", t->col_width, files[i]);  // Alignement gauche
+        if ((i + 1) % cols == 0)
+            ft_printf("\n");
+    }
+    ft_printf("\n");
+} */
+
+void    print_files_in_columns(char **files, t_term *t) {
+    int cols = t->term_width / t->col_width;
+    if (cols == 0) cols = 1;  // Sécurité pour éviter une division par zéro
+
+    for (size_t i = 0; i < t->count; i++) {
+        // Afficher la chaîne (alignement à gauche)
+        write(1, files[i], strlen(files[i]));
+        
+        // Ajouter des espaces pour obtenir l'alignement à gauche
+        int space_count = t->col_width - strlen(files[i]);
+        for (int j = 0; j < space_count; j++) {
+            write(1, " ", 1);
+        }
+
+        // Ajouter une nouvelle ligne après chaque colonne, si nécessaire
+        if ((i + 1) % cols == 0) {
+            write(1, "\n", 1);
+        }
+    }
+    write(1, "\n", 1);  // Nouvelle ligne à la fin
+}
+// a continuer
+void    list_directory_column(const char *path){
+    t_term t;
+    init_terminal(&t);
+
+    DIR *dir = opendir(path);
+    if (!dir) {
+        perror("opendir");
+        return;
+    }
+    struct dirent *entry;
+    t_dyn fileList;
+    init_dyn(&fileList);
+
+    while ((entry = readdir(dir)) != NULL) {
+        if (entry->d_name[0] == '.') continue; // Ignore fichiers cachés (comme `ls` normal)
+        append(&fileList, entry->d_name);
+        /* size_t len = ft_strlen(entry->d_name);
+        if (len > t.max_len){
+            t.max_len = len;
+        }
+        t.count++; */
+    }
+    closedir(dir);
+
+    if (fileList.length == 0){
+        free_dyn(&fileList);
+        return;
+    }
+
+    update_terminal(&t, fileList.list, fileList.length);
+    print_files_in_columns(fileList.list, &t);
+
+    /* t.col_width = t.max_len + 2;
+    int cols = t.term_width / t.col_width;
+    if (cols < 1) cols = 1;
+
+    for (size_t i = 0; i < t.count; i++) {
+        ft_printf("%-*s", t.col_width, fileList.list[i]); // Alignement
+        if ((i + 1) % cols == 0 || i == t.count - 1) ft_printf("\n");
+        
+    } */
+    free_dyn(&fileList);
+}
+
+
+void    list_directory(const char *path) {
+    
+    DIR *dir = opendir(path);
+    if (dir == NULL) {
+        perror("opendir");    
+        return;
+    }
+
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL) {
+        // Ignorer . et .. pour ne pas revenir au répertoire parent
+        if (ft_strcmp(entry->d_name, ".") == 0 || ft_strcmp(entry->d_name, "..") == 0) {
+            continue;
+        }
+        char full_path[MAX_PATH_LEN];
+        snprintf(full_path, sizeof(full_path), "%s/%s", path, entry->d_name);
+        //ft_printf("%s\n", full_path);
+        ft_printf("%s\n", entry->d_name);
+        }
+
+}
 
 // Fonction pour lister les fichiers d'un répertoire de manière itérative
-void list_directory_iterative(const char *start_path) {
+void    list_directory_iterative(const char *start_path) {
     t_stack *stack = NULL;  // Pile des répertoires à explorer
     push(&stack, start_path);  // Ajouter le répertoire de départ à la pile
 
@@ -159,9 +280,15 @@ int main(int argc, char *argv[]) {
         ft_printf("%s\n", filenames[i]);
 
     
-    const char *start_path = "../ft_ls_old/test_env";  // Exemple de répertoire de départ
+    const char *start_path = ".";  // Exemple de répertoire de départ
     list_directory_iterative(start_path);
-    
-
+    printf("\n\n");
+    list_directory(start_path);
+    printf("printf alignement gauche\n\n");
+    printf("[%-10s] [%s]\n", "test", "alignement");
+    printf("ft_printf alignement gauche\n\n");
+    ft_printf("[%-10s] [%s]\n", "test", "alignement");
+    printf("\n\n");
+    list_directory_column(start_path);
     return 0;
 }
