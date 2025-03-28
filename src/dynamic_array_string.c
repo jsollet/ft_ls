@@ -1,33 +1,31 @@
 #include "../libft/includes/libft.h"
 #include "../includes/dynamic_array_string.h"
 
-/* typedef struct s_dyn
-{
-    char **list;  // Tableau de chaînes de caractères
-    int length;   // Nombre d'éléments actuels
-    int capacity; // Capacité maximale actuelle
-} t_dyn; */
+
 
 void init_dyn(t_dyn *list)
 {
     list->capacity = 2;  // Capacité initiale
     list->length = 0;
-    list->list = malloc(list->capacity * sizeof(char *));
+    list->total_size = 0;
+    //list->list = malloc(list->capacity * sizeof(char *));
+    list->list = malloc(list->capacity * sizeof(t_fileData *));
     if (!list->list)
     {
-        ft_printf("Erreur d'allocation mémoire\n");
-        exit(1);
+        ft_printf_fd(2,"Erreur d'allocation mémoire\n");
+        exit(EXIT_FAILURE);
     }
 }
 
 void resize_dyn(t_dyn *list)
 {
     int new_capacity = list->capacity * 2;
-    char **new_list = malloc(new_capacity * sizeof(char *));
+    //char **new_list = malloc(new_capacity * sizeof(char *));
+    t_fileData **new_list =  malloc(new_capacity * sizeof(t_fileData *));
     if (!new_list)
     {
-        ft_printf("Erreur d'allocation mémoire (resize)\n");
-        exit(1);
+        ft_printf_fd(2,"Erreur d'allocation mémoire (resize)\n");
+        exit(EXIT_FAILURE);
     }
 
     // Copier les anciens éléments
@@ -39,7 +37,7 @@ void resize_dyn(t_dyn *list)
     list->capacity = new_capacity;
 }
 
-void append(t_dyn *list, const char *item)
+void append(t_dyn *list, t_fileData *item)
 {
     // Si on atteint la capacité, on agrandit
     if (list->length >= list->capacity)
@@ -47,11 +45,11 @@ void append(t_dyn *list, const char *item)
     
     // Allocation et copie de la chaîne
     //list->list[list->length] = malloc(ft_strlen(item) + 1);
-    list->list[list->length] = ft_strdup(item); 
+    list->list[list->length] = item; 
     if (!list->list[list->length])
     {
-        ft_printf("Erreur d'allocation pour la chaîne\n");
-        exit(1);
+        ft_printf_fd(2,"Erreur d'allocation pour la chaîne\n");
+        exit(EXIT_FAILURE);
     }
     //strcpy(list->list[list->length], item);
     list->length++;
@@ -59,8 +57,16 @@ void append(t_dyn *list, const char *item)
 
 void free_dyn(t_dyn *list)
 {
-    for (int i = 0; i < list->length; i++)
-        free(list->list[i]);  // Libération des chaînes
+    for (int i = 0; i < list->length; i++){
+        if (list->list[i]->owner){free(list->list[i]->owner);}
+        if (list->list[i]->group){free(list->list[i]->group);}
+        if (list->list[i]->fileName){free(list->list[i]->fileName);}
+        if (list->list[i]->absolutePath){free(list->list[i]->absolutePath);}
+        if (list->list[i]->path){free(list->list[i]->path);}
+        if (list->list[i]->link_target){free(list->list[i]->link_target);}
+        
+        free(list->list[i]);// Libération des items
+        }  
     free(list->list);         // Libération du tableau
 }
 

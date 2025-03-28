@@ -20,7 +20,7 @@ NAME = ft_ls
 RM = rm -f
 MKDIR = mkdir -p
 CC = gcc
-CFLAGS = -g -Wall -Wextra -Werror -I$(INCDIR)
+CFLAGS = -g  -Wall -Wextra -Werror -I$(INCDIR) #-fsanitize=address
 
 all: $(LIBFT) $(NAME)
 
