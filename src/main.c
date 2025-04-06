@@ -113,7 +113,7 @@ void check_files_exist(int argc, char *argv[]){
 }
 
 bool    parse_flags(int argc, char *argv[], t_flags *flags){
-	int index = 0;
+	int index = 1;
 	while (index < argc){
 		if (argv[index][0] == '-' && argv[index][1] != '\0'){
 			int position = 1;
@@ -710,17 +710,20 @@ void    list_directory_iterative_backup(const char *start_path,  t_flags *flags)
 
 int main(int argc, char *argv[]) {
 	t_flags flagls = {0};
-	bool result = parse_flags(argc, argv, &flagls);
-	
-	
+	bool had_minor_error = false;
+	bool had_serious_error = ! parse_flags(argc, argv, &flagls);
+
+	if (had_serious_error){
+		ft_printf_fd(2, "Serious error detected. Returning 2.\n");
+		return 2;
+	}
 	t_dyn files_arg;
 	init_dyn(&files_arg);
    
 	t_stack *stack = NULL;
 	t_stack *argument = NULL;
 	
-	if (result) {;}
-	//check_files_exist(argc, argv);
+
 
 	for (int i= 1; i < argc; i++){
 		if (argv[i][0] == '-') continue; 
@@ -736,7 +739,8 @@ int main(int argc, char *argv[]) {
 			struct stat buffer;
 	
 			if (stat(argv[i], &buffer) != 0) {
-				ft_printf_fd(2,"\nft_ls: %s: %s\n", argv[i], strerror(errno));
+				had_minor_error = true;
+				ft_printf_fd(2,"\nft_ls!: %s: %s\n", argv[i], strerror(errno));
 			}
 		}
 	}
@@ -745,5 +749,10 @@ int main(int argc, char *argv[]) {
 	//list_directory_iterative_new(&flagls, &stack, &argument ); //me semble foirreeux
 	
 	free_dyn(&files_arg);
+	if (had_minor_error){
+		ft_printf_fd(2, "Minor error detected. Returning 1.\n");
+		return 1;
+	}
+		
 	return 0;
 }
