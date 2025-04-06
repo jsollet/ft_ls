@@ -11,7 +11,7 @@
 /* ************************************************************************** */
 #include "libftprintf.h"
 
-int	power_10(int expo)
+static int	power_10(int expo)
 {
 	int	result;
 

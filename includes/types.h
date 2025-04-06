@@ -6,6 +6,15 @@
 # include <sys/stat.h>
 #include <sys/ioctl.h>
 
+#define MAX_PATH_LEN 1024
+
+// Structure de la pile pour les répertoires à explorer
+typedef struct s_stack {
+	size_t count;
+	char *path;
+	struct s_stack *next;
+} t_stack;
+
 typedef struct s_flags
 {
     bool    bigR;
@@ -15,6 +24,7 @@ typedef struct s_flags
     bool    t;
 
     // bonus a voir...
+    bool    e; // pour les acl
     bool    u;
     bool    f;
     bool    g;
@@ -30,15 +40,22 @@ typedef struct s_fileData
     char*           owner;
     char*           group;
     char*           link_target;
+    char*           timeStr;
+    char*           acl_text;
 
     long long       fileSize;
     long            linkNumber;
     long long       blocSize;
     //long long       total_size; // total de l'espace occupé par les fichiers dans le répertoire
 
+    bool            argument;
+    
     char            fileType;
     char            permission[11]; // Permissions (ex: "-rw-r--r--")
     char            lastModified[20]; // Date de modification (format "Feb 21 14:22")
+
+    char            has_acl;
+    char            has_xattr;
 
     time_t          st_mtimes;
     ino_t           st_ino;

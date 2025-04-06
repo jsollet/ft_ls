@@ -1,6 +1,7 @@
 #ifndef DYNAMIC_ARRAY_STRING_H
 # define DYNAMIC_ARRAY_STRING_H
 #include "types.h"
+#include "../libft/includes/libftprintf_fd.h"
 
 typedef struct s_dyn
 {

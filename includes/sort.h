@@ -3,9 +3,9 @@
 
 #include <stdlib.h>
 #include "types.h"
+#include "../libft/includes/libftprintf_fd.h"
 
-int     ft_strcmp(const char *s1, const char *s2);
-void    mergeSort_iterative_old(char *arr[], int n);
+
 int     compare_by_fileName(t_fileData *a, t_fileData *b);
 int     compare_by_absolutePath(t_fileData *a, t_fileData *b);
 int     compare_by_time(t_fileData *a, t_fileData *b);

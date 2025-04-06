@@ -65,7 +65,7 @@ typedef struct s_pgrm
 }	t_pgrm;
 // serie libft modifie
 size_t	ft_strlen_c1(const char *str, char del);
-size_t	ft_intlen(long long int n);
+size_t	ft_intlen_1(long long int n);
 void	ft_putchar_i(char c, t_pgrm *result);
 void	ft_putstr_i(char *str, t_pgrm *result);
 void	ft_nputchar_i(int n, char c, t_pgrm *result);
@@ -73,7 +73,7 @@ int		ft_issp(int c);
 int		ft_issw(int c);
 size_t	ft_atoi1(t_funcptr before, const char *str);
 // serie conversion numerique
-int		power_10(int expo);
+//int		power_10(int expo);
 int		cal(long long int i);
 int		calu(long long int i);
 void	ft_putnbr_1(int nb, t_n *a);

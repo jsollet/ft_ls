@@ -1,29 +1,23 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   libftprintf_fd.h                                   :+:      :+:    :+:   */
+/*   ft_strcmp.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: jsollett <marvin@42lausanne.ch>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/03/24 15:27:12 by jsollett          #+#    #+#             */
-/*   Updated: 2022/03/31 12:26:08 by jsollett         ###   ########.fr       */
+/*   Created: 2025/04/29 10:26:23 by jsollett          #+#    #+#             */
+/*   Updated: 2025/04/29 13:07:52 by jsollett         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef LIBFTPRINTF_FD_H
-# define LIBFTPRINTF_FD_H
-# include "libftprintf.h"
-# include <stddef.h>
-# include <stdio.h>
-# include <string.h>
-# include <stdlib.h>
-# include <unistd.h>
-# include <stdarg.h>
+#include "libft.h"
 
-
-
-
-
-
-int		ft_printf_fd(int fd, const char *inst, ...);
-#endif
+int ft_strcmp(const char *s1, const char *s2)
+{
+	while (*s1 && (*s1 == *s2))
+	{
+		s1++;
+		s2++;
+	}
+	return ((unsigned char)*s1 - (unsigned char)*s2);
+}

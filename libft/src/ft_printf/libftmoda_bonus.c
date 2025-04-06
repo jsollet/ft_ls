@@ -27,7 +27,7 @@ size_t	ft_strlen_c1(const char *str, char del)
 		return (len + 1);
 }
 
-size_t	ft_intlen(long long int n)
+size_t	ft_intlen_1(long long int n)
 {
 	size_t	result;
 	size_t	count;

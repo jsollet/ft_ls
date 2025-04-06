@@ -11,7 +11,7 @@
 /* ************************************************************************** */
 #include "libftprintf.h"
 
-void	ft_countflag(const char *inst, t_pgrm *fs)
+/* void	ft_countflag(const char *inst, t_pgrm *fs)
 {
 	int	len;
 
@@ -35,6 +35,34 @@ void	ft_countflag(const char *inst, t_pgrm *fs)
 			fs->flag.space++;
 	len--;
 	}
+} */
+
+void	ft_countflag(const char *inst, t_pgrm *fs)
+{
+	int	len;
+	int	i = 0;
+
+	if (fs->last.offset_w == 0 && fs->last.offset_p == 0)
+		len = fs->last.offset_c;
+	else if (fs->last.offset_w == 0 && fs->last.offset_p != 0)
+		len = fs->last.offset_p;
+	else
+		len = fs->last.offset_w;
+
+	while (i < len)  // On parcourt depuis le début du format
+	{
+		if (inst[i] == '+')
+			fs->flag.plus = 1;
+		else if (inst[i] == '-')
+			fs->flag.minus = 1;
+		else if (inst[i] == '0' && (i == 0 || !(inst[i - 1] >= '1' && inst[i - 1] <= '9')))
+			fs->flag.zero = 1;  // `0` est un flag SEULEMENT s'il est AVANT un nombre
+		else if (inst[i] == '#')
+			fs->flag.sharp = 1;
+		else if (inst[i] == ' ')
+			fs->flag.space = 1;
+		i++;
+	}
 }
 
 void	ft_getwidth(const char *inst, t_pgrm *result)
@@ -42,7 +70,7 @@ void	ft_getwidth(const char *inst, t_pgrm *result)
 	size_t	wl;
 
 	result->last.width = ft_atoi1(ft_issw, inst);
-	wl = ft_intlen(result->last.width);
+	wl = ft_intlen_1(result->last.width);
 	if (result->last.offset_p != 0)
 		result->last.offset_w = result->last.offset_p - wl;
 	if (result->last.offset_p == 0)

@@ -12,9 +12,6 @@
 
 #ifndef LIBFT_H
 # define LIBFT_H
-#include "get_next_line_bonus.h"
-#include "libftprintf.h"
-#include "libftprintf_fd.h"
 
 # include <stddef.h>
 # include <stdio.h>
@@ -31,6 +28,7 @@ typedef struct s_list
 // serie ajout
 int		power_10(int expo);
 size_t	ft_intlen(long long int n);
+int 	ft_strcmp(const char *s1, const char *s2);
 
 // serie is...(5)
 int		ft_isalpha(int c);
