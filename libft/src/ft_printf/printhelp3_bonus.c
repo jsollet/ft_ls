@@ -62,7 +62,7 @@ int	ft_printf(const char *inst, ...)
 	t_pgrm	conversion;
 
 	conversion.count = 0;
-	conversion.fd = 1; // On assigne le fd ici
+	conversion.fd = 1;
 	va_start(conversion.args, inst);
 	while (*inst != '\0')
 	{

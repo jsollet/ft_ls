@@ -4,12 +4,17 @@
 # include <stdbool.h>
 # include <time.h>
 # include <sys/stat.h>
-#include <sys/ioctl.h>
+# include <sys/types.h>
+# include <sys/ioctl.h>
 
 #define MAX_PATH_LEN 1024
 
+
+
+
 // Structure de la pile pour les répertoires à explorer
-typedef struct s_stack {
+typedef struct s_stack
+{
 	size_t count;
 	char *path;
 	struct s_stack *next;
@@ -25,15 +30,33 @@ typedef struct s_flags
 
     // bonus a voir...
     bool    e; // pour les acl
+    bool    at; // @ pour attibut etendu
     bool    u;
+    bool    U; // pour f
     bool    f;
     bool    g;
     bool    d;
 
 }   t_flags;
 
+typedef struct s_xttr
+{
+    char *name;
+    ssize_t size;
+} t_attr;
+
+typedef struct s_special_bit {
+	mode_t bit;
+	mode_t exec;
+	char   set;
+	char   no_exec;
+	int    pos;
+}	t_special_bit;
+
+
 typedef struct s_fileData
 {
+    bool            valid;        
     char*           fileName;
     char*           absolutePath;
     char*           path;
@@ -46,7 +69,6 @@ typedef struct s_fileData
     long long       fileSize;
     long            linkNumber;
     long long       blocSize;
-    //long long       total_size; // total de l'espace occupé par les fichiers dans le répertoire
 
     bool            argument;
     
@@ -54,10 +76,15 @@ typedef struct s_fileData
     char            permission[11]; // Permissions (ex: "-rw-r--r--")
     char            lastModified[20]; // Date de modification (format "Feb 21 14:22")
 
+    t_attr          *xattrs;
+    int             xattr_count;
+    bool            print_xattrs;
+
     char            has_acl;
     char            has_xattr;
 
     time_t          st_mtimes;
+    time_t          st_atimes;
     ino_t           st_ino;
 
 }   t_fileData;
@@ -71,4 +98,5 @@ typedef struct s_term
     size_t          max_len;
 }   t_term;
 
+typedef time_t (*get_time_func)(t_fileData *);
 #endif

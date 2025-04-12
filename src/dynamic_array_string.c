@@ -44,7 +44,36 @@ void    append(t_dyn *list, t_fileData *item)
 	list->length++;
 }
 
-void    free_dyn(t_dyn *list)
+void free_fileData(t_fileData *file)
+{
+	if (!file ) // attention || !file->valid
+		return;
+	if (file->owner) free(file->owner);
+	if (file->group) free(file->group);
+	if (file->fileName) free(file->fileName);
+	if (file->absolutePath) free(file->absolutePath);
+	if (file->path) free(file->path);
+	if (file->link_target) free(file->link_target);
+	if (file->acl_text) free(file->acl_text);
+	if (file->xattrs  && file->has_xattr == '@') { // a tester
+		for (int j = 0; j < file->xattr_count; j++) {
+			if (file->xattrs[j].name){
+				free(file->xattrs[j].name);
+			}
+		}
+		free(file->xattrs);
+	}
+	free(file);
+}
+
+void free_dyn(t_dyn *list)
+{
+	for (int i = 0; i < list->length; i++)
+		free_fileData(list->list[i]);
+	free(list->list);
+}
+
+/* void    free_dyn(t_dyn *list)
 {
 	for (int i = 0; i < list->length; i++){
 		if (list->list[i]->owner){free(list->list[i]->owner);}
@@ -54,7 +83,14 @@ void    free_dyn(t_dyn *list)
 		if (list->list[i]->path){free(list->list[i]->path);}
 		if (list->list[i]->link_target){free(list->list[i]->link_target);}
 		if (list->list[i]->acl_text){free(list->list[i]->acl_text);}
+		if (list->list[i]->xattrs) {
+			for (int j = 0; j < list->list[i]->xattr_count; j++) {
+				if (list->list[i]->xattrs[j].name)
+					free(list->list[i]->xattrs[j].name);
+			}
+			free(list->list[i]->xattrs);
+		}
 		free(list->list[i]);
 		}  
 	free(list->list);
-}
+} */

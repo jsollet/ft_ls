@@ -5,7 +5,14 @@
 #include "types.h"
 #include "../libft/includes/libftprintf_fd.h"
 
-
+time_t  get_mtime(t_fileData *f);
+time_t  get_atime(t_fileData *f);
+int     cmp_mtime(t_fileData *a, t_fileData *b);
+int		cmp_atime(t_fileData *a, t_fileData *b);
+int		cmp_mtime_rev(t_fileData *a, t_fileData *b);
+int		cmp_atime_rev(t_fileData *a, t_fileData *b);
+int     compare_by_time_generic(t_fileData *a, t_fileData *b, get_time_func get_time);
+int     compare_by_time_generic_reverse(t_fileData *a, t_fileData *b, get_time_func get_time);
 int     compare_by_fileName(t_fileData *a, t_fileData *b);
 int     compare_by_absolutePath(t_fileData *a, t_fileData *b);
 int     compare_by_time(t_fileData *a, t_fileData *b);

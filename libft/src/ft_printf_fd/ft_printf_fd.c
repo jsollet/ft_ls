@@ -12,16 +12,12 @@
 #include "../../includes/libft.h"
 #include "../../includes/libftprintf_fd.h"
 
-
-
-
-
 int	ft_printf_fd(int fd, const char *inst, ...)
 {
 	t_pgrm	conversion;
 
 	conversion.count = 0;
-	conversion.fd = fd; // On assigne le fd ici
+	conversion.fd = fd;
 	va_start(conversion.args, inst);
 	while (*inst != '\0')
 	{
