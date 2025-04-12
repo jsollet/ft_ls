@@ -901,7 +901,7 @@ int main(int argc, char *argv[]) {
 	int		double_dash_position = find_double_dash(argc, argv);
 	t_flags flags = {0};
 	t_exit_status exit_status = {};
-	if (!parse_flags(double_dash_position, argv, &flagls)){ // avant argc
+	if (!parse_flags(double_dash_position, argv, &flags)){ // avant argc
 		set_exit_status(&exit_status, 2, NULL);
 		return exit_status.code;
 	}
@@ -929,7 +929,7 @@ int main(int argc, char *argv[]) {
 	}
 
 
-	list_directory(&flagls, &stack, &argument, &exit_status );
+	list_directory(&flags, &stack, &argument, &exit_status );
 	//list_directory_iterative_new(&flagls, &stack, &argument ); //me semble foirreeux
 	
 	free_dyn(&files_arg);
