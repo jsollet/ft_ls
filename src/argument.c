@@ -5,7 +5,7 @@ bool file_exists(const char *path) {
 	return (stat(path, &buffer) == 0);
 }
 
-bool	is_directory(const char *path)
+bool	is_directory_slow(const char *path)
 { // a modifier
 
 	struct stat s;
@@ -39,7 +39,33 @@ bool	is_directory(const char *path)
 	return S_ISDIR(s.st_mode);
 }
 
+bool is_directory(const char *path) {
+    struct stat s;
+    
+    // On tente d'abord d'obtenir les infos avec lstat (qui est plus rapide)
+    if (lstat(path, &s) == -1) {
+        if (errno == EACCES) {
+            printf("Permission denied on: %s\n", path);
+			//ft_printf("\n-----LSTAT|%s|\n", path);
+        }
+		//ft_printf("\n-----LSTAT|%s|\n", path);
+        return false;  // En cas d'erreur, considérons que ce n'est pas un répertoire
+    }
 
+    // Si c'est un répertoire selon les infos de stat, on retourne vrai directement
+    if (S_ISDIR(s.st_mode)) {
+        return true;
+    }
+
+    // Sinon, on effectue un dernier contrôle avec opendir
+    DIR *dir = opendir(path);
+    if (dir != NULL) {
+        closedir(dir);  // On ferme immédiatement le répertoire ouvert
+        return true;
+    }
+	//ft_printf("\n-----OPENDIR|%s|\n", path);
+    return false;  // Ce n'est ni un répertoire, ni accessible
+}
 
 int find_double_dash(int argc, char *argv[]) {
 	int index = 1;
@@ -52,7 +78,7 @@ int find_double_dash(int argc, char *argv[]) {
 	return argc; // "--" non trouvé avant -1
 }
 
-void process_path(t_stack **dirs, t_stack **files,t_flags *flags, char *path, t_exit_status *exit_status) {
+void process_path(t_stack **dirs, t_stack **files, char *path, t_exit_status *exit_status) {
 	if (is_directory(path)) {
 		push(dirs, path);
 	}

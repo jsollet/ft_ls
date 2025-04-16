@@ -134,6 +134,18 @@ int compare_by_time_reverse_u(t_fileData *a, t_fileData *b) {
 	else return 0;
 }
 
+void insertion_sort(t_fileData *arr[], int left, int right, int (*cmp)(t_fileData *, t_fileData *)) {
+	for (int i = left + 1; i <= right; i++) {
+		t_fileData *key = arr[i];
+		int j = i - 1;
+		while (j >= left && cmp(arr[j], key) > 0) {
+			arr[j + 1] = arr[j];
+			j--;
+		}
+		arr[j + 1] = key;
+	}
+}
+
 void	merge(t_fileData *arr[], t_fileData *temp[], int left, int mid, int right, int (*cmp)(t_fileData *, t_fileData *)) {
 	int i = left, j = mid + 1, k = left;
 	
@@ -154,19 +166,36 @@ void	merge(t_fileData *arr[], t_fileData *temp[], int left, int mid, int right, 
 }
 
 void	mergeSort_iterative(t_fileData *arr[], int n, int (*cmp)(t_fileData *, t_fileData *)) {
+	const int INSERTION_THRESHOLD = 28;
 
 	t_fileData **temp = malloc(n * sizeof(t_fileData *));
 	if (!temp) {
 		ft_printf_fd(2,"Erreur d'allocation mémoire\n");
 		exit(EXIT_FAILURE);
 	}
-	for (int size = 1; size < n; size *= 2) {
+
+	// Étape 1 : tri par insertion sur les petits segments
+	for (int i = 0; i < n; i += INSERTION_THRESHOLD) {
+		int right = (i + INSERTION_THRESHOLD - 1 < n - 1) ? (i + INSERTION_THRESHOLD - 1) : (n - 1);
+		insertion_sort(arr, i, right, cmp);
+	}
+	// Étape 2 : fusion itérative
+	for (int size = INSERTION_THRESHOLD; size < n; size *= 2) {
+		for (int left = 0; left < n; left += 2 * size) {
+			int mid = left + size - 1;
+			if (mid >= n) continue;
+			int right = (left + 2 * size - 1 < n - 1) ? (left + 2 * size - 1) : (n - 1);
+			merge(arr, temp, left, mid, right, cmp);
+		}
+	}
+
+	/* for (int size = 1; size < n; size *= 2) {
 		for (int left = 0; left < n; left += 2 * size) {
 			int mid = left + size - 1;
 			if (mid >= n) break;
 			int right = (left + 2 * size - 1 < n - 1) ? (left + 2 * size - 1) : (n - 1);
 			merge(arr, temp, left, mid, right, cmp);
 		}
-	}
+	} */
 	free(temp);
 }

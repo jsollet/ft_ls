@@ -20,7 +20,7 @@ NAME = ft_ls
 RM = rm -f
 MKDIR = mkdir -p
 CC = gcc
-CFLAGS = -g  -Wall -Wextra -Werror -I$(INCDIR) #-fsanitize=address
+CFLAGS = -g -Wall -Wextra -Werror -I$(INCDIR) -O3 #-fsanitize=address #-fprofile-instr-generate -fcoverage-mapping
 
 all: $(LIBFT) $(NAME)
 

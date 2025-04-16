@@ -1,0 +1,44 @@
+#ifndef COLOR_H
+# define COLOR_H
+
+
+#define RESET_COLOR "\033[0m"
+// ANSI standard
+#define BLACK_COLOR "\033[0;30m"
+#define RED_COLOR "\033[31m"
+#define GREEN_COLOR "\033[32m"
+#define YELLOW_COLOR "\033[33m"
+#define BLUE_COLOR "\033[34m"
+#define MAGENTA_COLOR "\033[0;35m"
+#define CYAN_COLOR "\033[0;36m"
+#define WHITE_COLOR "\033[0;37m"
+// Bright
+#define BRIGHT_BLACK_COLOR "\033[0;90m"
+#define BRIGHT_RED_COLOR "\033[91m"
+#define BRIGHT_GREEN_COLOR "\033[92m"
+#define BRIGHT_YELLOW_COLOR "\033[93m"
+#define BRIGHT_BLUE_COLOR "\033[94m"
+#define BRIGHT_MAGENTA_COLOR "\033[0;95m"
+#define BRIGHT_CYAN_COLOR "\033[0;96m"
+#define BRIGHT_WHITE_COLOR "\033[0;97m"
+
+// Background
+#define BACK_BLACK_COLOR "\033[0;40m"
+#define BACK_RED_COLOR "\033[41m"
+#define BACK_GREEN_COLOR "\033[42m"
+#define BACK_YELLOW_COLOR "\033[43m"
+#define BACK_BLUE_COLOR "\033[44m"
+#define BACK_MAGENTA_COLOR "\033[0;45m"
+#define BACK_CYAN_COLOR "\033[0;46m"
+#define BACK_WHITE_COLOR "\033[0;47m"
+
+// Background Bright
+#define BRIGHT_BACK_BLACK_COLOR "\033[0;100m"
+#define BRIGHT_BACK_RED_COLOR "\033[101m"
+#define BRIGHT_BACK_GREEN_COLOR "\033[102m"
+#define BRIGHT_BACK_YELLOW_COLOR "\033[103m"
+#define BRIGHT_BACK_BLUE_COLOR "\033[104m"
+#define BRIGHT_BACK_MAGENTA_COLOR "\033[0;105m"
+#define BRIGHT_BACK_CYAN_COLOR "\033[0;106m"
+#define BRIGHT_BACK_WHITE_COLOR "\033[0;107m"
+#endif

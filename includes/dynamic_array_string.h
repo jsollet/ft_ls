@@ -15,5 +15,6 @@ typedef struct s_dyn
 void init_dyn(t_dyn *list);
 void resize_dyn(t_dyn *list);
 void append(t_dyn *list, t_fileData *item);
+void free_fileData(t_fileData *file);
 void free_dyn(t_dyn *list);
 #endif

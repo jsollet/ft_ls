@@ -16,6 +16,7 @@ void push(t_stack **stack, const char *path) {
 	else
 		new_node->count = 1;  
 	*stack = new_node;
+	//ft_printf("-----Empilé %s\n", path );
 }
 
 char *pop(t_stack **stack) {

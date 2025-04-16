@@ -3,7 +3,7 @@
 
 void    init_dyn(t_dyn *list)
 {
-	list->capacity = 2;
+	list->capacity = 1000000;
 	list->length = 0;
 	list->total_size = 0;
 	list->list = malloc(list->capacity * sizeof(t_fileData *));
@@ -48,12 +48,11 @@ void free_fileData(t_fileData *file)
 {
 	if (!file ) // attention || !file->valid
 		return;
-	if (file->owner) free(file->owner);
-	if (file->group) free(file->group);
+
 	if (file->fileName) free(file->fileName);
 	if (file->absolutePath) free(file->absolutePath);
-	if (file->path) free(file->path);
-	if (file->link_target) free(file->link_target);
+	//if (file->path) free(file->path);
+	//if (file->link_target) free(file->link_target);
 	if (file->acl_text) free(file->acl_text);
 	if (file->xattrs  && file->has_xattr == '@') { // a tester
 		for (int j = 0; j < file->xattr_count; j++) {
@@ -72,25 +71,3 @@ void free_dyn(t_dyn *list)
 		free_fileData(list->list[i]);
 	free(list->list);
 }
-
-/* void    free_dyn(t_dyn *list)
-{
-	for (int i = 0; i < list->length; i++){
-		if (list->list[i]->owner){free(list->list[i]->owner);}
-		if (list->list[i]->group){free(list->list[i]->group);}
-		if (list->list[i]->fileName){free(list->list[i]->fileName);}
-		if (list->list[i]->absolutePath){free(list->list[i]->absolutePath);}
-		if (list->list[i]->path){free(list->list[i]->path);}
-		if (list->list[i]->link_target){free(list->list[i]->link_target);}
-		if (list->list[i]->acl_text){free(list->list[i]->acl_text);}
-		if (list->list[i]->xattrs) {
-			for (int j = 0; j < list->list[i]->xattr_count; j++) {
-				if (list->list[i]->xattrs[j].name)
-					free(list->list[i]->xattrs[j].name);
-			}
-			free(list->list[i]->xattrs);
-		}
-		free(list->list[i]);
-		}  
-	free(list->list);
-} */

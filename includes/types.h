@@ -6,11 +6,18 @@
 # include <sys/stat.h>
 # include <sys/types.h>
 # include <sys/ioctl.h>
+# include <limits.h>
 
+#define SIX_MONTHS_IN_SECONDS 15552000
 #define MAX_PATH_LEN 1024
-
-
-
+#define FILE_NAME_MAX     NAME_MAX 
+#define OWNER_NAME_MAX    64            // largement suffisant
+#define GROUP_NAME_MAX    64
+#ifdef PATH_MAX
+    char buffer[PATH_MAX];
+#else
+    char buffer[4096]; // ou une valeur raisonnable
+#endif
 
 // Structure de la pile pour les répertoires à explorer
 typedef struct s_stack
@@ -22,27 +29,29 @@ typedef struct s_stack
 
 typedef struct s_flags
 {
-    bool    bigR;
-    bool    r;
-    bool    a;
-    bool    l;
-    bool    t;
+	bool    bigR;
+	bool    r;
+	bool    a;
+	bool    l;
+	bool    t;
 
-    // bonus a voir...
-    bool    e; // pour les acl
-    bool    at; // @ pour attibut etendu
-    bool    u;
-    bool    U; // pour f
-    bool    f;
-    bool    g;
-    bool    d;
+	// bonus a voir...
+	bool    e; // pour les acl
+	bool    at; // @ pour attibut etendu
+	bool    u;
+	bool    U; // pour f
+	bool    f;
+	bool    g;
+	bool    d;
+	bool    one; // -1
+	bool    color;
 
 }   t_flags;
 
 typedef struct s_xttr
 {
-    char *name;
-    ssize_t size;
+	char *name;
+	ssize_t size;
 } t_attr;
 
 typedef struct s_special_bit {
@@ -56,46 +65,48 @@ typedef struct s_special_bit {
 
 typedef struct s_fileData
 {
-    bool            valid;        
-    char*           fileName;
-    char*           absolutePath;
-    char*           path;
-    char*           owner;
-    char*           group;
-    char*           link_target;
-    char*           timeStr;
-    char*           acl_text;
+	bool            valid;        
+	char*           fileName;
+	//char            fileName[FILE_NAME_MAX + 1];
+	char*           absolutePath;
+	//char*           path;
+	char            owner[OWNER_NAME_MAX + 1];
+	char            group[GROUP_NAME_MAX + 1];
 
-    long long       fileSize;
-    long            linkNumber;
-    long long       blocSize;
+	char            link_target_buf[PATH_MAX];
 
-    bool            argument;
-    
-    char            fileType;
-    char            permission[11]; // Permissions (ex: "-rw-r--r--")
-    char            lastModified[20]; // Date de modification (format "Feb 21 14:22")
+	char*           acl_text;
 
-    t_attr          *xattrs;
-    int             xattr_count;
-    bool            print_xattrs;
+	long long       fileSize;
+	long            linkNumber;
+	long long       blocSize;
 
-    char            has_acl;
-    char            has_xattr;
+	bool            argument;
+	
+	char            fileType;
+	char            permission[11]; // Permissions (ex: "-rw-r--r--")
+	char            lastModified[20]; // Date de modification (format "Feb 21 14:22")
 
-    time_t          st_mtimes;
-    time_t          st_atimes;
-    ino_t           st_ino;
+	t_attr          *xattrs;
+	int             xattr_count;
+	bool            print_xattrs;
+
+	char            has_acl;
+	char            has_xattr;
+
+	time_t          st_mtimes;
+	time_t          st_atimes;
+	ino_t           st_ino;
 
 }   t_fileData;
 
 typedef struct s_term
 {
-    struct winsize  w;
-    int             term_width;
-    int             col_width;
-    size_t          count;
-    size_t          max_len;
+	struct winsize  w;
+	int             term_width;
+	int             col_width;
+	size_t          count;
+	size_t          max_len;
 }   t_term;
 
 typedef time_t (*get_time_func)(t_fileData *);

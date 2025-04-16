@@ -37,7 +37,7 @@ NAME = libft.a
 RM = rm -f
 MKDIR = mkdir -p
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror -I$(INCDIR)
+CFLAGS = -Wall -Wextra -Werror -I$(INCDIR) -O3
 
 # Compilation des fichiers sources généraux
 $(OBJDIR)/%.o: $(SRCDIR)/%.c $(HEADER) | $(OBJDIR)/
