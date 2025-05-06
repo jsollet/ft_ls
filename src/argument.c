@@ -5,39 +5,6 @@ bool file_exists(const char *path) {
 	return (stat(path, &buffer) == 0);
 }
 
-bool	is_directory_slow(const char *path)
-{ // a modifier
-
-	struct stat s;
-	if (lstat(path, &s) == -1)
-	{
-		//printf("lstat failed--- %s\n", path);
-		if (errno == EACCES)
-			printf("Permission denied on: %s\n", path);
-		if (errno == ENOTDIR)
-		{
-		//	printf("'%s' is not a directory\n", path);
-			return false; // Ce n'est pas un répertoire
-		}
-		if (!(errno == ENOTDIR) )
-		{
-			DIR *dir = opendir(path);
-			if (dir == NULL){
-				if (errno == ENOENT){
-		//			printf("'%s' is not a directory\n", path);
-					return false;
-				}
-				else 
-				printf("ft_ls: cannot access '%s': %s\n", path, strerror(errno));
-			}
-		
-		//	printf("'%s' is a directory\n", path);
-			return true;
-		}
-	}
-	//printf("---S_ISDIR of %s is %d\n", path,S_ISDIR(s.st_mode) );
-	return S_ISDIR(s.st_mode);
-}
 
 bool is_directory(const char *path) {
     struct stat s;
@@ -78,7 +45,7 @@ int find_double_dash(int argc, char *argv[]) {
 	return argc; // "--" non trouvé avant -1
 }
 
-void process_path(t_stack **dirs, t_stack **files, char *path, t_exit_status *exit_status) {
+void process_path_old(t_stack **dirs, t_stack **files, char *path, t_exit_status *exit_status) {
 	if (is_directory(path)) {
 		push(dirs, path);
 	}
@@ -91,5 +58,26 @@ void process_path(t_stack **dirs, t_stack **files, char *path, t_exit_status *ex
 			set_exit_status(exit_status, 2, NULL);
 			ft_printf_fd(2,"\nft_ls!: %s: %s\n", path, strerror(errno));
 		}
+	}
+}
+
+bool process_path(t_stack **dirs, t_stack **files, char *path, t_exit_status *exit_status) {
+	struct stat st;
+	if (lstat(path, &st) == -1) {
+		ft_printf_fd(2, "ft_ls: %s: %s\n", path, strerror(errno));
+		if (errno == ENOENT || errno == ENOTDIR) {
+			set_exit_status(exit_status, 2, NULL); // Fichier ou dossier inexistant
+		} else {
+			set_exit_status(exit_status, 1, NULL); // Autre erreur (ex: permission)
+		}
+		return false;
+	}
+
+	if (S_ISDIR(st.st_mode)) {
+		push(dirs, path);
+        return true;
+	} else {
+		push(files, path);
+        return true;
 	}
 }

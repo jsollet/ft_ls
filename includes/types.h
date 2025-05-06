@@ -19,6 +19,11 @@
     char buffer[4096]; // ou une valeur raisonnable
 #endif
 
+#define FLAG_LCOLOR "%-10s%c %3ld %-10s %-3s %5lld %-10s %s%-10s%s"
+#define FLAG_L "%-10s%c %3ld %-10s %-3s %5lld %-10s %-10s"
+#define FLAG_LGCOLOR "%-10s%c %3ld %-10s %5lld %-10s %s%-10s%s"
+#define FLAG_LG "%-10s%c %3ld %-10s %5lld %-10s %-10s" // a voir
+
 // Structure de la pile pour les répertoires à explorer
 typedef struct s_stack
 {
@@ -45,6 +50,10 @@ typedef struct s_flags
 	bool    d;
 	bool    one; // -1
 	bool    color;
+	// bonus optimisation attr
+	bool	acl;
+	bool	attr;
+	bool	extended;
 
 }   t_flags;
 
@@ -68,6 +77,7 @@ typedef struct s_fileData
 	bool            valid;        
 	char*           fileName;
 	//char            fileName[FILE_NAME_MAX + 1];
+	//char    		absolutePath[PATH_MAX + 1]; 
 	char*           absolutePath;
 	//char*           path;
 	char            owner[OWNER_NAME_MAX + 1];

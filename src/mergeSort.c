@@ -166,7 +166,7 @@ void	merge(t_fileData *arr[], t_fileData *temp[], int left, int mid, int right, 
 }
 
 void	mergeSort_iterative(t_fileData *arr[], int n, int (*cmp)(t_fileData *, t_fileData *)) {
-	const int INSERTION_THRESHOLD = 28;
+	const int INSERTION_THRESHOLD = 24;
 
 	t_fileData **temp = malloc(n * sizeof(t_fileData *));
 	if (!temp) {

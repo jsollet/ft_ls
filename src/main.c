@@ -22,8 +22,12 @@
 #include <limits.h>
 
 #define DEBUG false
+static size_t stat_call_count = 0;
+// global
+t_stack *stack_freelist = NULL;  // Liste de noeuds à réutiliser
 
-bool    list_directory_helper(const char *path, t_dyn *files, t_flags *flags, t_stack **stack, t_exit_status *exit_status,t_inodeSet *inode_set);
+
+bool    list_directory_helper(const char *path, t_dyn *files, t_flags *flags, t_stack **stack, t_exit_status *exit_status,t_inodeSet *inode_set, time_t now);
 void	fill_fake_fileInfo(t_fileData *file, const char *name);
 
 t_special_bit specials[] = {
@@ -46,95 +50,8 @@ t_fileData	*malloc_fileData(void)
 	return (file);
 }
 
-bool is_directory_test(const char *path)
-{
-	struct stat s;
-	
-	// Tenter d'obtenir des informations sur le fichier
-	if (lstat(path, &s) == -1)
-	{
-		// Si lstat échoue, on affiche un message d'erreur
-		perror("lstat failed");
-		
-		if (errno == EACCES)
-		{
-			printf("Permission denied on: %s\n", path);
-		}
 
-		// Si l'erreur est "not a directory", ce n'est pas un répertoire
-		if (errno == ENOTDIR)
-		{
-			printf("'%s' is not a directory\n", path);
-			return false; // Ce n'est pas un répertoire
-		}
 
-		// Si l'erreur n'est pas ENOTDIR, il pourrait s'agir d'un répertoire mais inaccessible
-		DIR *dir = opendir(path);
-		if (dir == NULL)
-		{
-			printf("Failed to open directory: %s\n", path);
-			printf("'%s' cannot be accessed: %s\n", path, strerror(errno));
-			return false; // Impossible d'ouvrir le répertoire
-		}
-		else
-		{
-			printf("'%s' is a directory (but we couldn't access with lstat)\n", path);
-			closedir(dir);
-			return true; // C'est un répertoire
-		}
-	}
-
-	// Si lstat réussit, on vérifie si c'est un répertoire
-	if (S_ISDIR(s.st_mode))
-	{
-		printf("'%s' is a directory\n", path);
-		return true;  // C'est un répertoire
-	}
-	
-	printf("'%s' is not a directory\n", path);
-	return false;  // Ce n'est pas un répertoire
-}
-/* 
-bool	is_directory(const char *path)
-{ // a modifier
-
-	struct stat s;
-	if (lstat(path, &s) == -1)
-	{
-		printf("lstat failed--- %s\n", path);
-		if (errno == EACCES)
-			printf("Permission denied on: %s\n", path);
-		if (errno == ENOTDIR)
-		{
-			printf("'%s' is not a directory\n", path);
-			return false; // Ce n'est pas un répertoire
-		}
-		if (!(errno == ENOTDIR) )
-		{
-			DIR *dir = opendir(path);
-			if (dir == NULL){
-				if (errno == ENOENT){
-					printf("'%s' is not a directory\n", path);
-					return false;
-				}
-				else 
-				printf("ft_ls: cannot access '%s': %s\n", path, strerror(errno));
-			}
-		
-			printf("'%s' is a directory\n", path);
-			return true;
-		}
-	}
-	//printf("---S_ISDIR of %s is %d\n", path,S_ISDIR(s.st_mode) );
-	return S_ISDIR(s.st_mode);
-}
- */
-bool    is_directory_old(const char *path){
-	DIR *dir = opendir(path);
-	if (dir == NULL) {return false;}
-	closedir(dir);    
-	return true;
-}
 
 char    *getPath(const char *file_name){// risque de leak
 	size_t  len = ft_strlen(file_name);
@@ -240,9 +157,23 @@ bool    parse_flags(int argc, char *argv[], t_flags *flags){
 	int index = 1;
 	while (index < argc){
 		if (argv[index][0] == '-' && argv[index][1] == '-'){
-			if (strcmp(argv[index], "--color") == 0) {
+			if (ft_strcmp(argv[index], "--color") == 0) {
 				flags->color = true;
-				printf("Option --color activée\n");
+				//printf("Option --color activée\n");
+			} else if (ft_strcmp(argv[index], "--acl") == 0){
+				flags->acl = true;
+				flags->e = true;
+			} else if (ft_strcmp(argv[index], "--attr") == 0){
+				flags->attr = true;
+				flags->at = true;
+			} else if (ft_strcmp(argv[index], "--extended") == 0){
+				flags->extended = true;
+			} else {
+				errno = EINVAL;
+				ft_printf_fd(2,"ls: invalid option -- '%s'\n", argv[index]);
+				ft_printf_fd(2,"ft_ls error: %s\n", strerror(errno));
+				ft_printf_fd(2, "usage: ./ft_ls [-@RUalrtufgde] [--color --acl --attr --extended][file ...]\n");
+				return false; //voir pour les erreur et leurs gestion
 			}
 		} else
 		if (argv[index][0] == '-' && argv[index][1] != '\0'){
@@ -264,9 +195,9 @@ bool    parse_flags(int argc, char *argv[], t_flags *flags){
 				else if (argv[index][position] == '1') flags->one = true;
 				else {
 					errno = EINVAL;
-					ft_printf_fd(2,"ls: invalid option -- '%c'\n", argv[index][position]);
+					ft_printf_fd(2,"ft_ls: invalid option -- '%c'\n", argv[index][position]);
 					ft_printf_fd(2,"ft_ls error: %s\n", strerror(errno));
-					ft_printf_fd(2, "usage: ls [-@RUalrtufgde] [file ...]\n");
+					ft_printf_fd(2, "usage: ./ft_ls [-@RUalrtufgde] [--color --acl --attr --extended][file ...]\n");
 					return false; //voir pour les erreur et leurs gestion
 				}
 				position++;
@@ -274,9 +205,9 @@ bool    parse_flags(int argc, char *argv[], t_flags *flags){
 		}
 		else if (argv[index][0] == '-' && argv[index][1] == '\0'){
 			errno = EINVAL;
-			ft_printf_fd(2, "ls: invalid option -- '-'\n");
+			ft_printf_fd(2, "ft_ls: invalid option -- '-'\n");
 			ft_printf_fd(2,"ft_ls error: %s\n", strerror(errno));
-			ft_printf_fd(2, "usage: ls [-@RUalrtufgde] [file ...]\n");
+			ft_printf_fd(2, "usage: ./ft_ls [-@RUalrtufgde] [--color --acl --attr --extended][file ...]\n");
 			return false;
 		}
 		index++;
@@ -493,15 +424,15 @@ void	get_symlink_target(const char *path,char *link_target_buf/*  char **link_ta
 
 // fonction pour get_fileInfo
 bool	fill_stat_data(const char *path, struct stat *sfile, t_fileData *file,  t_exit_status *exit_status){ // ajout de t_fileData *file
-	//ft_printf("\n--|%s|\n", path);
+	stat_call_count++;
 	if (lstat(path, sfile) == -1) {
-		//ft_printf("\n-----LSTAT|%s|\n", path);
+
 		fill_fake_fileInfo(file, path);
 		set_exit_status(exit_status, 1, strerror(errno));
 		
 		return false;
 	}
-	//ft_printf("\n-----LSTAT|%s|\n", path);
+
 	return true;
 }
 
@@ -515,7 +446,7 @@ void	fill_basic_info(t_fileData *file, struct stat *sfile, long *total_size){
 
 	file->xattrs = NULL;
 	file->xattr_count = 0;
-	file->has_xattr = '0';
+	file->has_xattr = '0'; // avant 0
 
 	*total_size += file->blocSize;
 }
@@ -530,37 +461,37 @@ void fill_permissions(t_fileData *file, struct stat *sfile){
 	get_permissions(sfile->st_mode, file->permission);
 }
 
-void fill_extended_attrs(t_fileData *file, t_exit_status *exit_status){
-	
+void fill_extended_attrs(t_fileData *file, t_flags *flag, t_exit_status *exit_status){
+	//printf("zut");
 	char *tmp = NULL;
 	file->acl_text = NULL;
-	
-	file->has_xattr= has_xattr(file->absolutePath, exit_status);
-	//printf("%s has attribute [%c]\n",file->absolutePath,file->has_xattr );
-
-	if (file->has_xattr == '?') {
-		file->has_xattr = ' ';
-		//return 1;
-	} //
-	if (file->has_xattr == '@') {
-		get_xattr(file, exit_status);
-		//if (status == 1){return 1;}
+	file->has_xattr = ' ';// ajout
+	file->has_acl = ' ';// ajout
+	// if (flag->acl || flag->attr || flag->extended || flag->e || flag->at)
+	// ajout 
+	if (flag->attr || flag->extended ||  flag->at) {
+		file->has_xattr= has_xattr(file->absolutePath, exit_status);
+		if (file->has_xattr == '@') {
+			get_xattr(file, exit_status);
+			//if (status == 1){return 1;}
+		}
 	}
-	if (file->has_xattr == ' '){
+
+	if (flag->acl || flag->extended || flag->e) {
 		file->has_acl = has_acl(file->absolutePath, &tmp, exit_status);
 		if (file->has_acl == '?') {file->has_acl = ' ';}//
 		if (file->has_acl == '+')
 		{
 			file->acl_text = format_acl_text(tmp);
-			free(tmp);
+			//free(tmp);
 		}
+		free(tmp);
 	}
-	//return 0;
 }
 
 // modification pour le falg u
-void fill_last_modified(t_fileData *file, struct stat *sfile, char flag_label){
-	time_t	now = time(NULL);
+void fill_last_modified_old(t_fileData *file, struct stat *sfile, char flag_label, time_t now){
+	
 	time_t	timeStamp;
 	if (flag_label == 'u')
 		timeStamp = sfile->st_atime;
@@ -583,6 +514,34 @@ void fill_last_modified(t_fileData *file, struct stat *sfile, char flag_label){
 		file->lastModified[0] = '\0';
 	}
 }
+
+void fill_last_modified(t_fileData *file, const struct stat *sfile, char flag_label, time_t now) {
+	time_t timeStamp = (flag_label == 'u') ? sfile->st_atime : sfile->st_mtime;
+
+	const char *timeStr = ctime(&timeStamp);
+	if (!timeStr) {
+		file->lastModified[0] = '\0';
+		return;
+	}
+
+	// ctime() retourne toujours une chaîne de 26 caractères, terminée par '\n' + '\0'
+	// Ex: "Wed Jun 30 21:49:08 1993\n\0"
+	// On évite ft_strlen ici, on sait que la \n est à la position 24
+	char timeBuf[26];
+	ft_memcpy(timeBuf, timeStr, 25);
+	timeBuf[24] = '\0'; // remplace \n
+
+	if (now - timeStamp > SIX_MONTHS_IN_SECONDS) {
+		// "Jun 30 1993" → mois (4 à 6), jour (8 à 9), année (20 à 23)
+		ft_strlcpy(file->lastModified, timeBuf + 4, 8);        // "Jun 30"
+		ft_strlcat(file->lastModified, " ", sizeof(file->lastModified));
+		ft_strlcat(file->lastModified, timeBuf + 20, sizeof(file->lastModified)); // "1993"
+	} else {
+		// "Jun 30 21:49"
+		ft_strlcpy(file->lastModified, timeBuf + 4, 13); // 12 + 1 pour \0
+	}
+}
+
 
 void fill_symlink_target(const char *path, t_fileData *file, t_exit_status *exit_status) {
 	if (file->fileType == 'l'){
@@ -617,7 +576,7 @@ void	fill_fake_fileInfo(t_fileData *file, const char *name){ // a modifier
 	file->valid = false; // a voir
 }
 
-void    get_fileInfo(const char* path, t_fileData *file,  t_flags *flag,long *total_size, t_exit_status *exit_status){
+void    get_fileInfo(const char* path, t_fileData *file,  t_flags *flag,long *total_size, t_exit_status *exit_status, time_t now){
 	
 	struct stat sfile;
 
@@ -641,15 +600,18 @@ void    get_fileInfo(const char* path, t_fileData *file,  t_flags *flag,long *to
 	fill_user_group_info(file, &sfile, exit_status);
 
 	fill_permissions(file, &sfile);
-	fill_extended_attrs(file, exit_status);
+	if (flag->acl || flag->attr || flag->extended || flag->e || flag->at){
+		fill_extended_attrs(file, flag, exit_status); // ici l'activer avec un flag special
+	}
+	
 
-	fill_last_modified(file, &sfile, flag_label);
+	fill_last_modified(file, &sfile, flag_label, now);
 	fill_symlink_target(path, file, exit_status);
 }
 
 // fonction pour list_directory
 
-void	process_argument_files(t_dyn *files,t_stack **directories_to_process, t_stack **fileList, t_flags *flag, t_exit_status *exit_status){
+void	process_argument_files(t_dyn *files,t_stack **directories_to_process, t_stack **fileList, t_flags *flag, t_exit_status *exit_status, time_t now){
 	while (*fileList != NULL){
 		char    *file_path = pop(fileList);
 		t_fileData *file = malloc_fileData();
@@ -665,8 +627,9 @@ void	process_argument_files(t_dyn *files,t_stack **directories_to_process, t_sta
 		//char *tmp_path = getPath(file_path);
 		//file->path = getPath(file_path);
 		file->absolutePath = ft_strdup(file_path);
+		//ft_strlcpy(file->absolutePath, file_path, sizeof(file->absolutePath) );
 		//ft_printf("\n {(%s0}\n", file_path);
-		get_fileInfo(file_path, file, flag,&files->total_size, exit_status ); //
+		get_fileInfo(file_path, file, flag,&files->total_size, exit_status, now ); //
 		if (file->fileType == 'd'  && !flag->d) { // ici modif pour -d
 			// Ajouter à la pile pour exploration
 			push(directories_to_process, file->absolutePath);
@@ -754,7 +717,7 @@ void display_sorted_files(bool an_error,t_dyn *files, t_flags *flags, bool is_di
 		int (*cmp)(t_fileData *, t_fileData *) = get_cmp_func(flags);
 		mergeSort_iterative(files->list, files->length, cmp);
 	}
-	
+	//bool first = true;
 
 	if (flags->l) {
 		
@@ -767,53 +730,42 @@ void display_sorted_files(bool an_error,t_dyn *files, t_flags *flags, bool is_di
 			}
 		
 		for (int i = 0; i < files->length; i++) {
-			/* if (!files->list[i]->valid)
-			{
-				continue;
-			} */
-			/* if (files->list[i]->has_xattr != '?'){
-				extra = files->list[i]->has_xattr;
-				if (extra == ' ')
-					extra = files->list[i]->has_acl;
-			} */
-			if (flags->color){
-				color = select_color_new(files->list[i], color_rules);
-			}
+
 			extra = files->list[i]->has_xattr;
 			if (extra == ' ')
 				extra = files->list[i]->has_acl;
-			/* char perms[12]; // 11 chars + \0
-			ft_memcpy(perms, files->list[i]->permission, 10);
-			perms[10] = extra;
-			perms[11] = '\0'; */
-			// date...
-			//format_last_modified(files->list[i], now, i);
-			// pas encore clair
-			ft_printf("%-10s%c %3ld", files->list[i]->permission, extra, files->list[i]->linkNumber); // Permissions, alignées à gauche
-			//printf("%c", extra);  
+			if (extra == '0')
+				extra = ' ' ;
+			if (flags->color){
+				color = select_color_new(files->list[i], color_rules);
+				if (!flags->g)
+					printf(FLAG_LCOLOR,files->list[i]->permission, extra, files->list[i]->linkNumber,  files->list[i]->owner,
+						files->list[i]->group, files->list[i]->fileSize, files->list[i]->lastModified, color,files->list[i]->fileName, reset);
+				else
+				printf(FLAG_LGCOLOR,files->list[i]->permission, extra, files->list[i]->linkNumber,  
+					files->list[i]->group, files->list[i]->fileSize, files->list[i]->lastModified,color,files->list[i]->fileName, reset);
+				
+			} else {
+				if (!flags->g)
+				printf(FLAG_L,files->list[i]->permission, extra, files->list[i]->linkNumber,  files->list[i]->owner,
+					files->list[i]->group, files->list[i]->fileSize, files->list[i]->lastModified, files->list[i]->fileName);
+				else
+				printf(FLAG_LG,files->list[i]->permission, extra, files->list[i]->linkNumber,  
+					files->list[i]->group, files->list[i]->fileSize, files->list[i]->lastModified,files->list[i]->fileName);
+			}
 			
-			//printf(" %3ld", files->list[i]->linkNumber); 
-			if (!flags->g)
-				ft_printf(" %-10s", files->list[i]->owner); 
-			ft_printf(" %-3s %5lld %-10s %s%-10s%s", files->list[i]->group, files->list[i]->fileSize, files->list[i]->lastModified, color, files->list[i]->fileName, reset); 
-			//printf(" %5lld", files->list[i]->fileSize); 
-			//printf(" %-10s", files->list[i]->lastModified); 
-			//printf(" %s%-10s%s", color, files->list[i]->fileName, reset); 
-
-
 			if (files->list[i]->fileType == 'l' && files->list[i]->link_target_buf[0] != '\0') {
-				ft_printf(" -> %s", files->list[i]->link_target_buf);
+				printf(" -> %s", files->list[i]->link_target_buf);
 			}
 			if (flags->e && files->list[i]->acl_text){ // ici peut etre pour afficher avec l'option @
-				ft_printf("\n%s\n", files->list[i]->acl_text);
+				printf("\n%s\n", files->list[i]->acl_text);
 			}
 			if (flags->at && files->list[i]->has_xattr== '@'){
 				for (int j=0;j < files->list[i]->xattr_count; j++){
-					ft_printf("\n\t%s\t%zd", files->list[i]->xattrs[j].name, files->list[i]->xattrs[j].size);
+					printf("\n\t%s\t%zd", files->list[i]->xattrs[j].name, files->list[i]->xattrs[j].size);
 				}
 			}
-			
-			ft_printf("\n");// interligne
+			printf("\n");// induit le saut de ligne correct
 		}
 	} else { // ici merdique
 		char *arr[files->length];
@@ -831,7 +783,11 @@ void display_sorted_files(bool an_error,t_dyn *files, t_flags *flags, bool is_di
 		else
 			list_directory_line(arr, color, files->length);
 	}
-	ft_printf("\n"); // il faudrait un test pour savoirsi c' est le premier ou le dernier
+/* 	first = true;
+	if (!first)
+        ft_printf("1\n");
+	first = false; */
+	//ft_printf("\n"); // il faudrait un test pour savoirsi c' est le premier ou le dernier
 	free(format);
 }
 
@@ -847,9 +803,9 @@ int is_root_directory(const char *path) {
 	return (ft_strcmp(path, "./") == 0 || ft_strcmp(path, ".") == 0);
 }
 // fonction pour list_directory
-void process_directory(const char *dir, t_dyn *files, t_flags *flags, t_stack **directories_to_process, bool first_dir, t_exit_status *exit_status, t_inodeSet *inode_set) {
-	bool an_error = list_directory_helper(dir, files, flags, directories_to_process, exit_status, inode_set);
-	if (!an_error && first_dir)
+void process_directory(const char *dir, t_dyn *files, t_flags *flags, t_stack **directories_to_process, bool first_dir, t_exit_status *exit_status, t_inodeSet *inode_set, time_t now) {
+	bool an_error = list_directory_helper(dir, files, flags, directories_to_process, exit_status, inode_set, now);
+	if (!an_error && (first_dir || flags->bigR))// ajout 
 		ft_printf("%s:\n", dir);
 	display_sorted_files(an_error, files, flags, true);
 }
@@ -869,14 +825,24 @@ void reset_dyn(t_dyn *dyn) {
 
 void    list_directory(t_flags *flags, t_stack **directories_to_process, t_stack **fileList, t_exit_status *exit_status) {
 	//printf("inside list_directoty\n");
+	time_t now = time(NULL);
 	t_dyn files;
 	init_dyn(&files);
 	static t_inodeSet inode_set;
 	inode_set_init(&inode_set);
 	static bool first_dir = false;
+	bool need_newline = false;
+	// ajout ici 
+	if (*directories_to_process)
+		reverse_stack(directories_to_process);
+	if (*fileList)
+		reverse_stack(fileList);
+
 	if (!first_dir) {  
 		first_dir = (*directories_to_process && (*directories_to_process)->count > 1); 
 	}
+	if (flags->bigR) // ajout pour forcer sirst_dir a true si -R
+		first_dir = true;
 	if (( *directories_to_process == NULL && *fileList == NULL )) {
 		
 		push(directories_to_process, ".");
@@ -885,12 +851,16 @@ void    list_directory(t_flags *flags, t_stack **directories_to_process, t_stack
 		first_dir = true;
 	}
 
-	
+	if (fileList != NULL) {// avant entre les 2 if 
+		process_argument_files(&files, directories_to_process, fileList, flags, exit_status, now);
+		display_sorted_files(true,&files, flags, false);
+		reset_dyn(&files);
+	}	
 	if (flags->d){
 		if (fileList)
-			process_argument_files(&files, NULL, fileList, flags, exit_status);
+			process_argument_files(&files, NULL, fileList, flags, exit_status, now);
 		if (directories_to_process)
-			process_argument_files(&files, NULL, directories_to_process, flags, exit_status); // a voir probelmatique
+			process_argument_files(&files, NULL, directories_to_process, flags, exit_status, now); // a voir probelmatique
 		
 		display_sorted_files(true, &files, flags, false);
 		free_dyn(&files);
@@ -900,17 +870,20 @@ void    list_directory(t_flags *flags, t_stack **directories_to_process, t_stack
 			while(*directories_to_process)
 			{
 				char *current_dir = pop(directories_to_process);
-				process_directory(current_dir, &files, flags,directories_to_process, first_dir, exit_status, &inode_set);
+				if (need_newline)
+        			ft_printf("\n");
+				process_directory(current_dir, &files, flags,directories_to_process, first_dir, exit_status, &inode_set, now);
+				need_newline = true;
 				free(current_dir);
 				reset_dyn(&files);
 				first_dir = true;
 			}
 		}
-	if (fileList != NULL) {// avant entre les 2 if 
-		process_argument_files(&files, directories_to_process, fileList, flags, exit_status);
+	/* if (fileList != NULL) {// avant entre les 2 if 
+		process_argument_files(&files, directories_to_process, fileList, flags, exit_status, now);
 		display_sorted_files(true,&files, flags, false);
 		reset_dyn(&files);
-	}	
+	}	 */
 	free_dyn(&files);
 	inode_set_free(&inode_set);
 }
@@ -925,15 +898,17 @@ bool handle_dir_open_error(const char *path) {
 
 
 
-t_fileData	*create_fileData(const char *dir_path, struct dirent *entry,t_flags *flag, long *total_size, t_exit_status *exit_status){
+t_fileData	*create_fileData(const char *dir_path, struct dirent *entry,t_flags *flag, long *total_size, t_exit_status *exit_status, time_t now){
 	t_fileData *file = malloc_fileData();
 	if (!file) return NULL;
 
 	file->fileName = ft_strdup(entry->d_name);
 	char *fullPath = ft_strjoin_multiple(dir_path, "/", entry->d_name, NULL);
+	//ft_strlcpy(file->absolutePath, fullPath,PATH_MAX + 1);
 	file->absolutePath = fullPath;//ft_strdup(fullPath); 
+
 	errno = 0;
-	get_fileInfo(fullPath,file,flag,total_size, exit_status);
+	get_fileInfo(fullPath,file,flag,total_size, exit_status, now);
 	//free(fullPath);
 	return file;
 }
@@ -946,11 +921,11 @@ bool	handle_subdir(t_dyn *subdirs, t_fileData *file) {
 	//clean_path(file->absolutePath);
 
 	subdir->fileName = ft_strdup(file->absolutePath); // On stocke juste le chemin absolu, pour le tri !
+	//ft_strlcpy(subdir->absolutePath, file->absolutePath, sizeof(file->absolutePath) );//
 	subdir->absolutePath = ft_strdup(file->absolutePath);
 	subdir->owner[0] = '\0';
 	subdir->group[0] = '\0';
-	//subdir->absolutePath = NULL;
-	//subdir->path = NULL;
+
 	subdir->link_target_buf[0] = '\0';
 	subdir->st_mtimes = file->st_mtimes;
 	subdir->st_mtimes = file->st_atimes;
@@ -959,7 +934,7 @@ bool	handle_subdir(t_dyn *subdirs, t_fileData *file) {
 	return true;
 }
 
-bool    list_directory_helper(const char *path, t_dyn *files, t_flags *flags, t_stack **directories_to_process, t_exit_status *exit_status, t_inodeSet *inode_set) {
+bool    list_directory_helper(const char *path, t_dyn *files, t_flags *flags, t_stack **directories_to_process, t_exit_status *exit_status, t_inodeSet *inode_set, time_t now) {
 	bool status;
 	(void)inode_set;
 	DIR *dir = opendir(path);
@@ -996,7 +971,7 @@ bool    list_directory_helper(const char *path, t_dyn *files, t_flags *flags, t_
 
 		if (!flags->a && (ft_strcmp(entry->d_name, "..") == 0 || entry->d_name[0] == '.')) { continue;}
 
-		t_fileData *file = create_fileData(path, entry, flags, &files->total_size, exit_status);
+		t_fileData *file = create_fileData(path, entry, flags, &files->total_size, exit_status, now);
 		if (!file){
 			if (errno)
         		perror("create_fileData");
@@ -1053,6 +1028,7 @@ bool    list_directory_helper(const char *path, t_dyn *files, t_flags *flags, t_
 int main(int argc, char *argv[]) {
 	// Forcer la locale "C" pour éviter toute gestion locale spéciale
     setenv("LC_ALL", "C", 1);
+	bool has_valid_input = false;//
 
 	int		double_dash_position = find_double_dash(argc, argv);
 	t_flags flags = {0};
@@ -1067,14 +1043,29 @@ int main(int argc, char *argv[]) {
 	
 	for (int i = 1; i < double_dash_position; i++){
 		if (argv[i][0] == '-'){continue;}
-		process_path(&directories, &files_argument, argv[i], &exit_status);
+		//bool test = process_path(&directories, &files_argument, argv[i], &exit_status);
+		//printf("test valid input %d\n", test);
+		if (process_path(&directories, &files_argument, argv[i], &exit_status)) {
+			has_valid_input = true;
+		}
+	}
+	if (!has_valid_input) {// ajout
+		return exit_status.code;
 	}
 	for (int i = double_dash_position + 1; i < argc; i++){ // attn
-		process_path(&directories, &files_argument, argv[i], &exit_status);
+		//process_path(&directories, &files_argument, argv[i], &exit_status);
+		if (process_path(&directories, &files_argument, argv[i], &exit_status)) {
+			has_valid_input = true;
+		}
+	
+	}
+	if (!has_valid_input) {// ajout
+		return exit_status.code;
 	}
 
 	list_directory(&flags, &directories, &files_argument, &exit_status );
-	debug_print_inode_stats();
+	//debug_print_inode_stats();
 	free(exit_status.message);
+	//fprintf(stderr, "Total lstat calls: %zu\n", stat_call_count);
 	return exit_status.code;
 }
