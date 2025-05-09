@@ -152,7 +152,7 @@ void fill_permissions(t_fileData *file, struct stat *sfile){
 
 void fill_extended_attrs(t_fileData *file, t_flags *flag, t_exit_status *exit_status){
 	//printf("zut");
-	char *tmp = NULL;
+	//char *tmp = NULL;
 	file->acl_text = NULL;
 	file->has_xattr = ' ';// ajout
 	file->has_acl = ' ';// ajout

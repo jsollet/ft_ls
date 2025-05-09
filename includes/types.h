@@ -13,12 +13,13 @@
 #define FILE_NAME_MAX     NAME_MAX 
 #define OWNER_NAME_MAX    64            // largement suffisant
 #define GROUP_NAME_MAX    64
+/*
 #ifdef PATH_MAX
     char buffer[PATH_MAX];
 #else
     char buffer[4096]; // ou une valeur raisonnable
 #endif
-
+*/
 #define FLAG_LCOLOR "%-10s%c %3ld %-10s %-3s %5lld %-10s %s%-10s%s"
 #define FLAG_L "%-10s%c %3ld %-10s %-3s %5lld %-10s %-10s"
 #define FLAG_LGCOLOR "%-10s%c %3ld %-10s %5lld %-10s %s%-10s%s"

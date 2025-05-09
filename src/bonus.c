@@ -138,7 +138,7 @@ char has_xattr(const char *path, t_exit_status *exit_status)
         }
     #endif
 }
-
+#ifdef __APPLE__
 char	has_acl(const char *path, char **text, t_exit_status *exit_status)
 {
 	acl_t acl = NULL;
@@ -162,7 +162,7 @@ char	has_acl(const char *path, char **text, t_exit_status *exit_status)
 		}
 		return ' ';
 }
-
+#endif
 
 char	*ft_strjoin_multiple(const char *first, ...){
 	if (!first)

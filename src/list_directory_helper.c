@@ -124,8 +124,9 @@ bool    list_directory_helper(const char *path, t_dyn *files, t_flags *flags, t_
 	while (1){
 		errno = 0;
 		entry = readdir(dir);
-    	if (!entry)
-        	break;
+    		if (!entry){
+        		break;
+		}
 
 		if (!flags->a && (ft_strcmp(entry->d_name, "..") == 0 || entry->d_name[0] == '.')) { continue;}
 

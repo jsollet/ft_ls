@@ -36,17 +36,20 @@ void    print_files_in_columns(char **files, t_term *t, char **color) {
 			if (index < t->count) {
 				
 				ft_printf("%s", color[index]);
-				write(1, files[index], ft_strlen(files[index]));
+				ssize_t _unused = write(1, files[index], ft_strlen(files[index]));
+				(void)_unused;
 				ft_printf("%s", reset);
 				
 				int space_count = t->col_width - ft_strlen(files[index]);
 				for (int j = 0; j < space_count; j++) {
-					write(1, " ", 1);
+					ssize_t _unused=write(1, " ", 1);
+					(void)_unused;
 				}
 			}
 		}
 
-		write(1, "\n", 1);
+		ssize_t _unused=write(1, "\n", 1);
+		(void)_unused;
 	}
 }
 

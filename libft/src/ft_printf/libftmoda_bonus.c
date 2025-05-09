@@ -46,7 +46,8 @@ size_t	ft_intlen_1(long long int n)
 
 void	ft_putchar_i(char c, t_pgrm *result)
 {
-	write(result->fd, &c, 1);
+	ssize_t _unused = write(result->fd, &c, 1);
+	(void)_unused;
 	result->count++;
 }
 
@@ -54,7 +55,8 @@ void	ft_putstr_i(char *str, t_pgrm *result)
 {
 	while (*str != '\0')
 	{
-		write(result->fd, str, 1);
+		ssize_t _unused = write(result->fd, str, 1);
+		(void)_unused;
 		result->count++;
 		str++;
 	}
@@ -66,7 +68,8 @@ void	ft_nputchar_i(int n, char c, t_pgrm *result)
 	{
 		while (n)
 		{
-			write(result->fd, &c, 1);
+			ssize_t _unused = write(result->fd, &c, 1);
+			(void) _unused;
 			result->count++;
 			n--;
 		}
