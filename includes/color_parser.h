@@ -2,7 +2,8 @@
 # define COLOR_PARSER_H
 #include "./color.h"
 #include "./types.h"
-
+#include "../libft/includes/libft.h"
+#include "../libft/includes/libftprintf.h"
 typedef struct s_color_rule {
 	char    type;
 	bool    (*condition)(t_fileData *);
@@ -17,4 +18,7 @@ bool    is_socket(t_fileData *file);
 bool    is_fifo(t_fileData *file);
 bool    is_block_device(t_fileData *file);
 bool    is_char_device(t_fileData *file);
+
+void	display_file_in_color(t_fileData *file, t_flags *flags, char *fileName);
+char	*select_color_new(t_fileData *file, t_color_rule *color_rules);
 #endif

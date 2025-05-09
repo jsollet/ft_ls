@@ -71,3 +71,8 @@ void free_dyn(t_dyn *list)
 		free_fileData(list->list[i]);
 	free(list->list);
 }
+
+void reset_dyn(t_dyn *dyn) {
+	free_dyn(dyn);
+	init_dyn(dyn);
+}

@@ -9,13 +9,13 @@ bool file_exists(const char *path) {
 bool is_directory(const char *path) {
     struct stat s;
     
-    // On tente d'abord d'obtenir les infos avec lstat (qui est plus rapide)
+    
     if (lstat(path, &s) == -1) {
         if (errno == EACCES) {
             printf("Permission denied on: %s\n", path);
-			//ft_printf("\n-----LSTAT|%s|\n", path);
+			
         }
-		//ft_printf("\n-----LSTAT|%s|\n", path);
+		
         return false;  // En cas d'erreur, considérons que ce n'est pas un répertoire
     }
 

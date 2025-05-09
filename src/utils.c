@@ -1,5 +1,10 @@
 #include <stddef.h>
 #include <stdint.h>
+#include "../includes/utils.h"
+
+
+
+
 
 void	*ft_memcpy_fast(void *dest, const void *source, size_t n)
 {
@@ -70,4 +75,34 @@ void *ft_memcpy_faster(void *dest, const void *src, size_t n)
 		*d++ = *s++;
 
 	return dest;
+}
+
+t_fileData	*malloc_fileData(void)
+{
+	t_fileData *file;
+	file = malloc(sizeof(t_fileData));
+	if (!file)
+		return NULL;
+	ft_bzero(file, sizeof(t_fileData));
+	file->valid = false; // a voir
+	return (file);
+}
+
+void clean_path(char *path) {
+	char *src = path, *dst = path;
+	int was_slash = 0;
+
+	while (*src) {
+		if (*src == '/') {
+			if (!was_slash) {
+				*dst++ = *src;
+				was_slash = 1;
+			}
+		} else {
+			*dst++ = *src;
+			was_slash = 0;
+		}
+		src++;
+	}
+	*dst = '\0';
 }

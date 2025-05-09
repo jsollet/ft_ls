@@ -1,8 +1,8 @@
 #ifndef HASHTABLE_H
 # define HASHTABLE_H
 # include <sys/stat.h>
-#include <stdbool.h>
-#include <stddef.h>
+# include <stdbool.h>
+# include <stddef.h>
 
 /* #define INODE_HASH_SIZE 2097143
 

@@ -74,7 +74,17 @@ int compare_by_time_generic_reverse(t_fileData *a, t_fileData *b, get_time_func 
 		return 1;
 }
 
-
+int	(*get_cmp_func(t_flags *flags))(t_fileData *, t_fileData *) {
+	if (flags->t && !flags->r){
+		//printf("\nsorting compare time [%p]\n", compare_by_time);
+		return compare_by_time;}
+	else if (flags->t && flags->r)
+		return compare_by_time_reverse;
+	else if (!flags->t && !flags->r)
+		return compare_by_fileName;
+	else
+		return compare_by_fileName_reverse;
+}
 
 
 // ancienne version

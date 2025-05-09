@@ -4,7 +4,9 @@
 #include "./types.h"
 #include "./error.h"
 #include <sys/xattr.h>
-#include <sys/acl.h>
+#if defined(__APPLE__)
+# include <sys/acl.h>
+#endif
 #include <unistd.h>
 #include <errno.h>
 

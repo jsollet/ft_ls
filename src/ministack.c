@@ -34,7 +34,30 @@ char *pop(t_stack **stack) {
 	return path;
 }
 
+t_stack *pop_node(t_stack **stack) {
+	if (!*stack) return NULL;
+	t_stack *node = *stack;
+	*stack = node->next;
+	node->next = NULL;
+	return node;
+}
+
+
+void push_existing_node(t_stack **stack, t_stack *node) {
+	node->next = *stack;
+	*stack = node;
+}
+
 void reverse_stack(t_stack **stack) {
+	t_stack *reversed = NULL;
+	while (*stack) {
+		t_stack *node = pop_node(stack);
+		push_existing_node(&reversed, node);
+	}
+	*stack = reversed;
+}
+
+void reverse_stack_old(t_stack **stack) {
 	t_stack *reversed = NULL;
 	while (*stack) {
 		push(&reversed, pop(stack));
@@ -42,7 +65,7 @@ void reverse_stack(t_stack **stack) {
 	*stack = reversed;
 }
 
-/* void print_stack(t_stack *stack) {
+void print_stack(t_stack *stack) {
 	ft_printf("Path: ");
 	while (stack != NULL) {
 		ft_printf("%s (%zu)->", stack->path, stack->count);
@@ -50,7 +73,7 @@ void reverse_stack(t_stack **stack) {
 	}
 	ft_printf("\n");
 }
-
+/*
 t_stack *get_stack_node(void) {
 	t_stack *node;
 

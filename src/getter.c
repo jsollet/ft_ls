@@ -1,0 +1,240 @@
+
+
+#include "../includes/getter.h"
+t_special_bit specials[] = {
+	{S_ISUID, S_IXUSR, 's', 'S', 3},
+	{S_ISGID, S_IXGRP, 's', 'S', 6},
+	{S_ISVTX, S_IXOTH, 't', 'T', 9}
+};
+
+void get_owner_group(struct stat *sfile, char *owner, size_t owner_size,
+	char *group, size_t group_size, t_exit_status *exit_status)
+{
+	bool error = false;
+	struct passwd *pwd = getpwuid(sfile->st_uid);
+	struct group  *grp = getgrgid(sfile->st_gid);
+
+	if (pwd)
+		ft_strlcpy(owner, pwd->pw_name, owner_size);
+	else {
+		ft_strlcpy(owner, "UNKNOWN", owner_size);
+		error = true;
+	}
+
+	if (grp)
+		ft_strlcpy(group, grp->gr_name, group_size);
+	else {
+		ft_strlcpy(group, "UNKNOWN", group_size);
+		error = true;
+	}
+	if (error)
+		set_exit_status(exit_status, 1, NULL);
+}
+
+char    get_file_type(mode_t mode){
+	if (S_ISDIR(mode)) return 'd';
+	if (S_ISLNK(mode)) return 'l';
+	if (S_ISREG(mode)) return '-';
+	if (S_ISCHR(mode)) return 'c';
+	if (S_ISBLK(mode)) return 'b';
+	if (S_ISFIFO(mode)) return 'p';
+	if (S_ISSOCK(mode)) return 's';
+	return '?';
+}
+
+void    get_permissions(mode_t mode, char *permission) {
+	if (mode & S_IRUSR) permission[1] = 'r';
+		else permission[1] = '-';
+	if (mode & S_IWUSR) permission[2] = 'w';
+		else permission[2] = '-';
+	if (mode & S_IXUSR) permission[3] = 'x';
+		else permission[3] = '-';
+	if (mode & S_IRGRP) permission[4] = 'r';
+		else permission[4] = '-';
+	if (mode & S_IWGRP) permission[5] = 'w';
+		else permission[5] = '-';
+	if (mode & S_IXGRP) permission[6] = 'x';
+		else permission[6] = '-';
+	if (mode & S_IROTH) permission[7] = 'r';
+		else permission[7] = '-';
+	if (mode & S_IWOTH) permission[8] = 'w';
+		else permission[8] = '-';
+	if (mode & S_IXOTH) permission[9] = 'x';
+		else permission[9] = '-';
+	permission[10] = '\0';
+	apply_special_bits(mode, permission);
+}
+
+void apply_special_bits(mode_t mode, char *perm) {
+	for (int i = 0; i < 3; ++i) {
+		t_special_bit sb = specials[i];
+		if (mode & sb.bit)
+			perm[sb.pos] = (mode & sb.exec) ? sb.set : sb.no_exec;
+		else
+			perm[sb.pos] = (mode & sb.exec) ? 'x' : '-';
+	}
+}
+
+void	get_symlink_target(const char *path,char *link_target_buf, size_t buf_size , t_exit_status *exit_status){
+	ssize_t len = readlink(path, link_target_buf, buf_size - 1);
+
+	if (len != -1){
+		link_target_buf[len] = '\0';
+	} else {
+		link_target_buf[0] = '\0';
+		set_exit_status(exit_status, 1, NULL);       
+	}
+}
+
+
+bool	fill_stat_data(const char *path, struct stat *sfile, t_fileData *file,  t_exit_status *exit_status){ // ajout de t_fileData *file
+	if (lstat(path, sfile) == -1) {
+
+		fill_inaccessible_fileInfo(file, path);
+		ft_printf_fd(2, "ft_ls: %s: %s\n", path, strerror(errno)); 
+		set_exit_status(exit_status, 1, strerror(errno));
+		
+		return false;
+	}
+	return true;
+}
+
+
+void	fill_basic_info(t_fileData *file, struct stat *sfile, long *total_size){
+	file->fileSize = sfile->st_size;
+	file->linkNumber = sfile->st_nlink;
+	file->blocSize = sfile->st_blocks;
+	file->st_mtimes = sfile->st_mtime;
+	file->st_atimes = sfile->st_atime;
+	file->st_ino = sfile->st_ino;
+
+	file->xattrs = NULL;
+	file->xattr_count = 0;
+	file->has_xattr = '0';
+
+	*total_size += file->blocSize;
+}
+
+void	fill_user_group_info(t_fileData *file, struct stat *sfile, t_exit_status *exit_status){
+	get_owner_group(sfile, file->owner, sizeof(file->owner),file->group, sizeof(file->group), exit_status);	
+}
+
+void	fill_inaccessible_fileInfo(t_fileData *file, const char *name){
+
+	
+	ft_memset(file->permission, '?', 10); file->permission[10] = '\0';
+	ft_memset(file->lastModified, '?',19); file->lastModified[19] = '\0';
+	
+	if (is_directory(name)){
+		file->permission[0] = 'd';
+	} else {
+		file->permission[0] = '-';
+	}
+
+	file->fileSize = 0;
+	file->linkNumber = 0;
+
+	file->owner[0] = '?';file->owner[1] = '\0';
+	file->group[0] = '?';file->group[1] = '\0';
+	file->lastModified[0] = '?';file->lastModified[1] = '\0';
+	//ft_strlcpy(file->owner, "?", 3 /* sizeof(file->owner) */);
+	//ft_strlcpy(file->group, "?", 3 /* sizeof(file->group) */);
+	//ft_strlcpy(file->lastModified, "?", 1); //
+
+	file->valid = false; // a voir
+}
+
+void fill_permissions(t_fileData *file, struct stat *sfile){
+	file->fileType =get_file_type(sfile->st_mode);
+	file->permission[0] = file->fileType;
+	get_permissions(sfile->st_mode, file->permission);
+}
+
+void fill_extended_attrs(t_fileData *file, t_flags *flag, t_exit_status *exit_status){
+	//printf("zut");
+	char *tmp = NULL;
+	file->acl_text = NULL;
+	file->has_xattr = ' ';// ajout
+	file->has_acl = ' ';// ajout
+	// if (flag->acl || flag->attr || flag->extended || flag->e || flag->at)
+	// ajout 
+	if (flag->attr || flag->extended ||  flag->at) {
+		file->has_xattr= has_xattr(file->absolutePath, exit_status);
+		if (file->has_xattr == '@') {
+			get_xattr(file, exit_status);
+			//if (status == 1){return 1;}
+		}
+	}
+	#ifdef __APPLE__
+	if (flag->acl || flag->extended || flag->e) {
+		file->has_acl = has_acl(file->absolutePath, &tmp, exit_status);
+		if (file->has_acl == '?') {file->has_acl = ' ';}//
+		if (file->has_acl == '+')
+		{
+			file->acl_text = format_acl_text(tmp);
+			//free(tmp);
+		}
+		free(tmp);
+	}
+	#endif
+}
+
+void fill_last_modified(t_fileData *file, const struct stat *sfile, char flag_label, time_t now) {
+	time_t timeStamp = (flag_label == 'u') ? sfile->st_atime : sfile->st_mtime;
+
+	const char *timeStr = ctime(&timeStamp);
+	if (!timeStr) {
+		file->lastModified[0] = '\0';
+		return;
+	}
+
+	// ctime() retourne toujours une chaîne de 26 caractères, terminée par '\n' + '\0'
+	// Ex: "Wed Jun 30 21:49:08 1993\n\0"
+	// On évite ft_strlen ici, on sait que la \n est à la position 24
+	char timeBuf[26];
+	ft_memcpy(timeBuf, timeStr, 25);
+	timeBuf[24] = '\0'; // remplace \n
+
+	if (now - timeStamp > SIX_MONTHS_IN_SECONDS) {
+		// "Jun 30 1993" → mois (4 à 6), jour (8 à 9), année (20 à 23)
+		ft_strlcpy(file->lastModified, timeBuf + 4, 8);        // "Jun 30"
+		ft_strlcat(file->lastModified, " ", sizeof(file->lastModified));
+		ft_strlcat(file->lastModified, timeBuf + 20, sizeof(file->lastModified)); // "1993"
+	} else {
+		// "Jun 30 21:49"
+		ft_strlcpy(file->lastModified, timeBuf + 4, 13); // 12 + 1 pour \0
+	}
+}
+
+
+void fill_symlink_target(const char *path, t_fileData *file, t_exit_status *exit_status) {
+	if (file->fileType == 'l'){
+		get_symlink_target(path, file->link_target_buf, sizeof(file->link_target_buf), exit_status);		
+	}
+	else {
+		file->link_target_buf[0] = '\0';
+	}		
+}
+
+void    get_fileInfo(const char* path, t_fileData *file,  t_flags *flag,long *total_size, t_exit_status *exit_status, time_t now){ // voir pour enlever ou pas FAKE
+	
+	struct stat sfile;
+
+	char	flag_label;
+	if (flag->u) flag_label = 'u';
+	else flag_label = 't';
+
+	if (!fill_stat_data(path, &sfile, file, exit_status))
+		return;
+
+	file->valid = true;
+	fill_basic_info(file, &sfile, total_size);
+	fill_user_group_info(file, &sfile, exit_status);
+
+	fill_permissions(file, &sfile);
+	if (flag->acl || flag->attr || flag->extended || flag->e || flag->at){
+		fill_extended_attrs(file, flag, exit_status);
+	}
+	fill_last_modified(file, &sfile, flag_label, now);
+	fill_symlink_target(path, file, exit_status);
+} 
