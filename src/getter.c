@@ -151,8 +151,6 @@ void fill_permissions(t_fileData *file, struct stat *sfile){
 }
 
 void fill_extended_attrs(t_fileData *file, t_flags *flag, t_exit_status *exit_status){
-	//printf("zut");
-	//char *tmp = NULL;
 	file->acl_text = NULL;
 	file->has_xattr = ' ';// ajout
 	file->has_acl = ' ';// ajout
@@ -166,6 +164,7 @@ void fill_extended_attrs(t_fileData *file, t_flags *flag, t_exit_status *exit_st
 		}
 	}
 	#ifdef __APPLE__
+	char *tmp = NULL;
 	if (flag->acl || flag->extended || flag->e) {
 		file->has_acl = has_acl(file->absolutePath, &tmp, exit_status);
 		if (file->has_acl == '?') {file->has_acl = ' ';}//
