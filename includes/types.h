@@ -80,6 +80,13 @@ typedef struct s_special_bit {
 	int    pos;
 }	t_special_bit;
 
+typedef struct s_dynamic_format {
+	int		max_name_width;
+	int		max_owner_width;
+	int		max_group_width;
+	int		max_size_width;
+	//...
+}	t_dynamic_format;
 
 typedef struct s_fileData
 {
