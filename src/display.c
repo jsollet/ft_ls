@@ -38,7 +38,12 @@ void display_sorted_files(bool an_error,t_dyn *files, t_flags *flags, bool is_di
 			}
 		
 		for (int i = 0; i < files->length; i++) {
-
+			if (!files->list[i]->valid){
+				//printf(RED_COLOR);
+				printf(FLAG_INACCESSIBLE, files->list[i]->permission, extra, "?", files->list[i]->owner,
+					files->list[i]->group,"?",files->list[i]->lastModified,files->list[i]->fileName);
+				continue;
+			} 
 			extra = files->list[i]->has_xattr;
 			if (extra == ' ')
 				extra = files->list[i]->has_acl;

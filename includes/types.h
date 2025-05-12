@@ -7,6 +7,7 @@
 # include <sys/types.h>
 # include <sys/ioctl.h>
 # include <limits.h>
+# include "./color.h"
 
 #define SIX_MONTHS_IN_SECONDS 15552000
 #define MAX_PATH_LEN 1024
@@ -25,6 +26,13 @@
 #define FLAG_LGCOLOR "%-10s%c %3ld %-10s %5lld %-10s %s%-10s%s"
 #define FLAG_LG "%-10s%c %3ld %-10s %5lld %-10s %-10s" // a voir
 
+
+//#define FLAG_INACCESSIBLE "%-10s%c %-7s %-10s %-3s %-5s %-10s %-10s\n"
+//#define FLAG_L            "%-10s%c %3ld %-10s %-3s %5lld %-10s %-10s"
+//#define FLAG_INACCESSIBLE "%-10s%c %3s %-10s %-3s\033[31m %5s\033[0m  %-10s %-10s\n"
+//#define FLAG_L "%-10s%c %7ld %-10s %-3s %-5lld %-10s %-10s"
+#define FLAG_INACCESSIBLE "%-10s%c.%3s.%4s %-3s %-5s %-10s %-10s\n"
+// le 4 car la largeur est de 10 et la taille de root (si max) sera de 4 donc il faudra voir 
 // Structure de la pile pour les répertoires à explorer
 typedef struct s_stack
 {
@@ -77,6 +85,7 @@ typedef struct s_fileData
 {
 	bool            valid;        
 	char*           fileName;
+	unsigned char			d_type;
 	//char            fileName[FILE_NAME_MAX + 1];
 	//char    		absolutePath[PATH_MAX + 1]; 
 	char*           absolutePath;

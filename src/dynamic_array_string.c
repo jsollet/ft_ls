@@ -3,7 +3,7 @@
 
 void    init_dyn(t_dyn *list)
 {
-	list->capacity = 1000000;
+	list->capacity = 256; // 1000000
 	list->length = 0;
 	list->total_size = 0;
 	list->list = malloc(list->capacity * sizeof(t_fileData *));
@@ -46,15 +46,13 @@ void    append(t_dyn *list, t_fileData *item)
 
 void free_fileData(t_fileData *file)
 {
-	if (!file ) // attention || !file->valid
+	if (!file )
 		return;
 
 	if (file->fileName) free(file->fileName);
 	if (file->absolutePath) free(file->absolutePath);
-	//if (file->path) free(file->path);
-	//if (file->link_target) free(file->link_target);
 	if (file->acl_text) free(file->acl_text);
-	if (file->xattrs  && file->has_xattr == '@') { // a tester
+	if (file->xattrs  && file->has_xattr == '@') {
 		for (int j = 0; j < file->xattr_count; j++) {
 			if (file->xattrs[j].name){
 				free(file->xattrs[j].name);

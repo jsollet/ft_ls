@@ -183,6 +183,7 @@ t_fileData	*create_fileData(const char *dir_path, struct dirent *entry,t_flags *
 	t_fileData *file = malloc_fileData();
 	if (!file) return NULL;
 
+	file->d_type = entry->d_type;
 	file->fileName = ft_strdup(entry->d_name);
 	char *fullPath = ft_strjoin_multiple(dir_path, "/", entry->d_name, NULL);
 	//ft_strlcpy(file->absolutePath, fullPath,PATH_MAX + 1);

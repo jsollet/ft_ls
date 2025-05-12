@@ -6,7 +6,7 @@ bool file_exists(const char *path) {
 }
 
 
-bool is_directory(const char *path) {
+bool is_directory_1(const char *path) {
     struct stat s;
     
     
@@ -32,6 +32,16 @@ bool is_directory(const char *path) {
     }
 	//ft_printf("\n-----OPENDIR|%s|\n", path);
     return false;  // Ce n'est ni un répertoire, ni accessible
+}
+
+bool is_directory(const char *path) {
+    struct stat s;
+
+    if (lstat(path, &s) == -1) {
+        return false;
+    }
+
+    return S_ISDIR(s.st_mode);
 }
 
 int find_double_dash(int argc, char *argv[]) {

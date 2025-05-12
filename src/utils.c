@@ -84,7 +84,7 @@ t_fileData	*malloc_fileData(void)
 	if (!file)
 		return NULL;
 	ft_bzero(file, sizeof(t_fileData));
-	file->valid = false; // a voir
+	file->valid = true; // a voir avant false
 	return (file);
 }
 

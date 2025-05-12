@@ -119,18 +119,42 @@ void	fill_user_group_info(t_fileData *file, struct stat *sfile, t_exit_status *e
 	get_owner_group(sfile, file->owner, sizeof(file->owner),file->group, sizeof(file->group), exit_status);	
 }
 
+char convert_d_type_to_char(unsigned char d_type) {
+	switch (d_type) {
+		case DT_DIR:  return 'd';
+		case DT_REG:  return '-';
+		case DT_LNK:  return 'l';
+		case DT_SOCK: return 's';
+		case DT_FIFO: return 'p';
+		case DT_CHR:  return 'c';
+		case DT_BLK:  return 'b';
+		default:      return '?';
+	}
+}
+
 void	fill_inaccessible_fileInfo(t_fileData *file, const char *name){
 
 	
 	ft_memset(file->permission, '?', 10); file->permission[10] = '\0';
 	ft_memset(file->lastModified, '?',19); file->lastModified[19] = '\0';
 	
-	if (is_directory(name)){
+	/* if (is_directory(name)){
 		file->permission[0] = 'd';
 	} else {
 		file->permission[0] = '-';
-	}
-
+	} */
+	if (file->d_type != DT_UNKNOWN) {
+        file->permission[0] = convert_d_type_to_char(file->d_type);
+    } else {
+        // Si d_type est inconnu, on utilise is_directory pour déterminer si c'est un répertoire
+        if (is_directory(name)) {
+            file->permission[0] = 'd';
+        } else {
+            file->permission[0] = '-';
+        }
+    }
+	/* file->permission[0] = file->d_type;
+	printf("d_type %c\n",file->d_type); */
 	file->fileSize = 0;
 	file->linkNumber = 0;
 
@@ -226,7 +250,7 @@ void    get_fileInfo(const char* path, t_fileData *file,  t_flags *flag,long *to
 	if (!fill_stat_data(path, &sfile, file, exit_status))
 		return;
 
-	file->valid = true;
+	//file->valid = true;
 	fill_basic_info(file, &sfile, total_size);
 	fill_user_group_info(file, &sfile, exit_status);
 
