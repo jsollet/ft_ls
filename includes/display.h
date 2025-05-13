@@ -13,6 +13,6 @@
 
 
 
-void display_sorted_files(bool an_error,t_dyn *files, t_flags *flags, bool is_directory);
+void display_sorted_files(bool an_error,t_dyn *files, t_flags *flags, bool is_directory, t_dynamic_format *dyn_format);
 
 #endif

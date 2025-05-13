@@ -24,15 +24,21 @@
 #define FLAG_LCOLOR "%-10s%c %3ld %-10s %-3s %5lld %-10s %s%-10s%s"
 #define FLAG_L "%-10s%c %3ld %-10s %-3s %5lld %-10s %-10s"
 #define FLAG_LGCOLOR "%-10s%c %3ld %-10s %5lld %-10s %s%-10s%s"
-#define FLAG_LG "%-10s%c %3ld %-10s %5lld %-10s %-10s" // a voir
+#define FLAG_LG "%-10s%c %3ld %-10s %5lld %-10s %-10s"
+
+#define FLAG_L_DYNAMIC  "%-10s%c %3ld %-*s %-*s %*lld %-10s %-10s"
+#define FLAG_LCOLOR_DYNAMIC "%-10s%c %3ld %-*s %-*s %*lld %-10s %s%-10s%s"
+#define FLAG_LGCOLOR_DYNAMIC "%-10s%c %3ld %-*s %*lld %-10s %s%-10s%s"
+#define FLAG_LG_DYNAMIC "%-10s%c %3ld %-*s %*lld %-10s %-10s"
 
 
-//#define FLAG_INACCESSIBLE "%-10s%c %-7s %-10s %-3s %-5s %-10s %-10s\n"
-//#define FLAG_L            "%-10s%c %3ld %-10s %-3s %5lld %-10s %-10s"
-//#define FLAG_INACCESSIBLE "%-10s%c %3s %-10s %-3s\033[31m %5s\033[0m  %-10s %-10s\n"
-//#define FLAG_L "%-10s%c %7ld %-10s %-3s %-5lld %-10s %-10s"
 #define FLAG_INACCESSIBLE "%-10s%c.%3s.%4s %-3s %-5s %-10s %-10s\n"
+
 // le 4 car la largeur est de 10 et la taille de root (si max) sera de 4 donc il faudra voir 
+//#define FLAG_L_DYNAMIC        "%-10s%c %3ld %-*s %-*s %*lld %-10s %-10s"
+
+#define FLAG_INACCESSIBLE_DYN   "%-10s%c %3s %-*s %-*s %*s %-10s %-10s\n" // petit decalage avec le nom du fichier mais pas clair
+#define FLAG_INACCESSIBLE_DYN_G "%-10s%c %3s %-*s %*s %-10s %-10s\n" // petit decalage avec le nom du fichier mais pas clair
 // Structure de la pile pour les répertoires à explorer
 typedef struct s_stack
 {
@@ -81,10 +87,10 @@ typedef struct s_special_bit {
 }	t_special_bit;
 
 typedef struct s_dynamic_format {
-	int		max_name_width;
-	int		max_owner_width;
-	int		max_group_width;
-	int		max_size_width;
+	size_t		max_name_width;
+	size_t		max_owner_width;
+	size_t		max_group_width;
+	size_t		max_size_width;
 	//...
 }	t_dynamic_format;
 

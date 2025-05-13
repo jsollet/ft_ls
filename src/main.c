@@ -107,30 +107,36 @@ int main(int argc, char *argv[]) {
 
 	t_stack *directories = NULL;
 	t_stack *files_argument = NULL;
+	t_stack *raw_argument = NULL; // pour flag -d 
 	
+	
+
 	for (int i = 1; i < double_dash_position; i++){
 		if (argv[i][0] == '-'){continue;}
 
 		path_was_given = true;
-		
-		if (process_path(&directories, &files_argument, argv[i], &exit_status)) {
+		if (flags.d){
+			push(&raw_argument, argv[i]),
 			has_valid_input = true;
 		}
-	}
-	/* if (directories == NULL){
-		push(&directories, ".");
-		has_valid_input = true;
-	}
-	if (!has_valid_input) {// ajout
-		return exit_status.code;
-	} */
-	for (int i = double_dash_position + 1; i < argc; i++){
-		if (process_path(&directories, &files_argument, argv[i], &exit_status)) {
-			has_valid_input = true;
-		}
-	
+		else {
+			if (process_path(&directories, &files_argument, argv[i], &exit_status)) {
+				has_valid_input = true;
+			}
+		}	
 	}
 
+	for (int i = double_dash_position + 1; i < argc; i++){
+		if (flags.d){
+			push(&raw_argument, argv[i]),
+			has_valid_input = true;
+		} else {
+			if (process_path(&directories, &files_argument, argv[i], &exit_status)) {
+				has_valid_input = true;
+			}
+		}
+	}
+	
 	// Aucun chemin fourni → on ajoute "." par défaut
 	if (!path_was_given) {
 		process_path(&directories, &files_argument, ".", &exit_status);
@@ -140,8 +146,12 @@ int main(int argc, char *argv[]) {
 	if (!has_valid_input) {// ajout
 		return exit_status.code;
 	}
-
-	list_directory(&flags, &directories, &files_argument, &exit_status );
+	if (flags.d){
+		list_directory(&flags, &directories, &raw_argument, &exit_status);
+	} else {
+		list_directory(&flags, &directories, &files_argument, &exit_status);
+	}
+	
 	free(exit_status.message);
 	return exit_status.code;
 }

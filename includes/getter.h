@@ -32,5 +32,5 @@ void	fill_extended_attrs(t_fileData *file, t_flags *flag, t_exit_status *exit_st
 void	fill_last_modified(t_fileData *file, const struct stat *sfile, char flag_label, time_t now);
 void	fill_symlink_target(const char *path, t_fileData *file, t_exit_status *exit_status);
 
-void    get_fileInfo(const char* path, t_fileData *file,  t_flags *flag,long *total_size, t_exit_status *exit_status, time_t now);
+void    get_fileInfo(const char* path, t_fileData *file,  t_flags *flag,long *total_size, t_exit_status *exit_status, time_t now,  t_dynamic_format *dyn_format);
 #endif

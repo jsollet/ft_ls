@@ -10,14 +10,6 @@
 #include "../includes/types.h"
 #include "../libft/includes/libftprintf.h"
 
-/* void *safe_malloc(size_t size) {
-    void *ptr = malloc(size);
-    if (!ptr) {
-        perror("malloc failed");
-        exit(1);  // Code d'erreur majeur
-    }
-    return ptr;
-} */
 
 ssize_t	get_xattr_size(t_fileData *file, char *buffer, ssize_t size){
 	#ifdef __APPLE__
@@ -31,9 +23,9 @@ ssize_t	get_xattr_size(t_fileData *file, char *buffer, ssize_t size){
 void	fill_xattr_structure(t_fileData *file, char *buffer, ssize_t size){
 	int	j = 0;
 	int	i = 0;
-	//printf("ssize size = %zu\n", size);
+	
 	while (i < size){
-		//printf("buffer {%s}\n", &buffer[i]);
+
 		char *name = &buffer[i];
 		file->xattrs[j].name = ft_strdup(name);
 		#ifdef __APPLE__
@@ -59,11 +51,11 @@ void 	get_xattr(t_fileData *file,  t_exit_status *exit_status){
 
 	if (size < 0) {
 		set_exit_status(exit_status, 1, "NULL");
-        return;  // Erreur lors de l'appel à listxattr
+        return;
     }
 
 	if (size == 0) {
-        return;  // Pas d'attributs étendus
+        return;
     }
 
 	buffer = malloc(size); // 
@@ -73,9 +65,9 @@ void 	get_xattr(t_fileData *file,  t_exit_status *exit_status){
 	}
 	tmp = get_xattr_size(file, buffer, size);
 	if (tmp < 0) {
-        free(buffer);  // Libérer la mémoire en cas d'erreur
+        free(buffer);
 		set_exit_status(exit_status, 1, "NULL");
-        return;  // Erreur lors de l'appel à listxattr avec le buffer
+        return;
     }
 
 	while (i < size){
@@ -90,51 +82,35 @@ void 	get_xattr(t_fileData *file,  t_exit_status *exit_status){
 		return ;
 	}
 	for (int j = 0; j < count; j++) {
-        file->xattrs[j].name = NULL;  // Initialiser name à NULL
+        file->xattrs[j].name = NULL;
     }
 	file->xattr_count = count;
 	fill_xattr_structure(file, buffer, size);
 	free(buffer);
 }
 
-/* char	has_xattr(const char *path)
-{
-	#ifdef __APPLE__
-		if (listxattr(path, NULL, 0, XATTR_NOFOLLOW) > 0)
-			return '@';
-	#else
-		if (listxattr(path, NULL, 0) > 0)
-			return '@';
-	#endif
-		return ' ';
-} */
 
 char has_xattr(const char *path, t_exit_status *exit_status)
 {
     #ifdef __APPLE__
         ssize_t result = listxattr(path, NULL, 0, XATTR_NOFOLLOW);
         if (result > 0)
-            return '@'; // Attributs étendus trouvés
+            return '@';
         else if (result == 0)
-            return ' '; // Pas d'attributs étendus
+            return ' ';
         else {
 			set_exit_status(exit_status, 1, strerror(errno));
-            // Gérer l'erreur ici, oui voir comment et peut etre une erreur qu' on retourne
-            //perror("listxattr failed");
-			//ft_printf("ft_ls %s:%s\n", path, strerror(errno));
-            return ' '; // En cas d'erreur au debut space puis ? 
+            return ' ';  
         }
     #else
         ssize_t result = listxattr(path, NULL, 0);
         if (result > 0)
-            return '@'; // Attributs étendus trouvés
+            return '@';
         else if (result == 0)
-            return ' '; // Pas d'attributs étendus
+            return ' ';
         else {
 			set_exit_status(exit_status, 1, strerror(errno));
-            // Gérer l'erreur ici
-            //perror("listxattr failed");
-            return ' '; // En cas d'erreur
+            return ' ';
         }
     #endif
 }
@@ -171,13 +147,12 @@ char	*ft_strjoin_multiple(const char *first, ...){
 	const char *current_str = first;
 	va_list args;
 	va_start(args, first);
-	// Calculer la longueur totale de toutes les chaînes
 	while (current_str) {
 		total_length += ft_strlen(current_str);
 		current_str = va_arg(args, const char *);
 	}
 	va_end(args);
-	// Alloue la mémoire pour la chaîne finale
+
 	char *result = malloc(total_length + 1);
 	if (!result)
 		return NULL;
@@ -210,7 +185,7 @@ char *concat_with_newline(char *result, const char *line) {
 	if (*result)
 		newline = ft_strjoin(result, "\n");
 	else
-		newline = ft_strdup(""); // Pas de saut de ligne si result est vide
+		newline = ft_strdup("");
 
 	char *new_result = ft_strjoin(newline, line);
 	free(newline);
@@ -227,111 +202,26 @@ char *format_acl_text(const char *acl_text) {
 		return NULL;
 	}
 
-	for (int i = 1; lines[i]; i++) {// i = 1 avant
-		char **tokens = ft_split(lines[i], ':');
-		if (!tokens)
-			continue;
-
-		// On s'assure qu'on a au moins 6 tokens
-		if (tokens[0] && tokens[2] && tokens[4] && tokens[5]) {
-			char *index = ft_itoa(i-1);
-			// Utilisation de la fonction variadique sans avoir besoin de spécifier le nombre d'arguments
-			char *line = ft_strjoin_multiple(index, ":", tokens[0], ":", tokens[2], " ", tokens[4], " ", tokens[5], NULL);
-			if (!check_and_free(tokens, line))
-				continue;
-
-			result = concat_with_newline(result, line);
-			free(line);
-			free(index);
-		}
-
-		// Free les tokens
-		for (int j = 0; tokens[j]; j++)
-			free(tokens[j]);
-		free(tokens);
-	}
-
-	// Free les lignes
-	for (int i = 0; lines[i]; i++)
-		free(lines[i]);
-	free(lines);
-
-	return result;
-}
-
-
-
-char	*format_acl_text1(const char *acl_text) {
-	if (!acl_text)
-		return NULL;
-
-	char **lines = ft_split(acl_text, '\n');
-	if (!lines)
-		return NULL;
-
-	char *result = ft_strdup("");
-	if (!result)
-		return NULL;
-
 	for (int i = 1; lines[i]; i++) {
 		char **tokens = ft_split(lines[i], ':');
 		if (!tokens)
 			continue;
 
-		// on s'assure qu'on a au moins 6 tokens (user, UUID, name, ID, allow, perms)
 		if (tokens[0] && tokens[2] && tokens[4] && tokens[5]) {
-			char *line = ft_strdup("");  // ligne formatée temporaire
-			char *tmp;
-
-			tmp = ft_strjoin(line, tokens[0]);  // user
+			char *index = ft_itoa(i-1);			
+			char *line = ft_strjoin_multiple(index, ":", tokens[0], ":", tokens[2], " ", tokens[4], " ", tokens[5], NULL);
+			if (!check_and_free(tokens, line))
+				continue;
+			result = concat_with_newline(result, line);
 			free(line);
-			line = tmp;
-
-			tmp = ft_strjoin(line, ":");
-			free(line);
-			line = tmp;
-
-			tmp = ft_strjoin(line, tokens[2]);  // root
-			free(line);
-			line = tmp;
-
-			tmp = ft_strjoin(line, " ");
-			free(line);
-			line = tmp;
-
-			tmp = ft_strjoin(line, tokens[4]);  // allow
-			free(line);
-			line = tmp;
-
-			tmp = ft_strjoin(line, " ");
-			free(line);
-			line = tmp;
-
-			tmp = ft_strjoin(line, tokens[5]);  // read
-			free(line);
-			line = tmp;
-
-			tmp = ft_strjoin(result, *result ? "\n" : "");  // saut de ligne si nécessaire
-			free(result);
-			result = tmp;
-
-			tmp = ft_strjoin(result, line);  // ajout au résultat
-			free(result);
-			result = tmp;
-
-			free(line);
+			free(index);
 		}
-
-		// free les tokens
 		for (int j = 0; tokens[j]; j++)
 			free(tokens[j]);
 		free(tokens);
 	}
-
-	// free les lignes
 	for (int i = 0; lines[i]; i++)
 		free(lines[i]);
 	free(lines);
-
 	return result;
 }

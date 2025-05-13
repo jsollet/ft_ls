@@ -1,7 +1,7 @@
 
 #include "../includes/display.h"
 
-void display_sorted_files(bool an_error,t_dyn *files, t_flags *flags, bool is_directory) {
+void display_sorted_files(bool an_error,t_dyn *files, t_flags *flags, bool is_directory, t_dynamic_format *dyn_format) {
 	char *reset = RESET_COLOR;
 	char *color = reset;
 	t_color_rule color_rules[] = {
@@ -18,15 +18,14 @@ void display_sorted_files(bool an_error,t_dyn *files, t_flags *flags, bool is_di
 		{0, NULL, RESET_COLOR} // Fin de la table
 	};
 
-	char extra ;
+	char attribute ;
 	char *format = ft_strdup("%-10s %3ld %-10s %10s %7ld %-20s %-30s");
 	if (!flags->U){ // trie la liste des fichiers et dossier dans le repertoire courant
 		
 		int (*cmp)(t_fileData *, t_fileData *) = get_cmp_func(flags);
 		mergeSort_iterative(files->list, files->length, cmp);
 	}
-	//bool first = true;
-
+	
 	if (flags->l) {
 		
 		if (is_directory && files->length >= 0  && !an_error) {
@@ -38,33 +37,70 @@ void display_sorted_files(bool an_error,t_dyn *files, t_flags *flags, bool is_di
 			}
 		
 		for (int i = 0; i < files->length; i++) {
-			if (!files->list[i]->valid){
-				//printf(RED_COLOR);
-				printf(FLAG_INACCESSIBLE, files->list[i]->permission, extra, "?", files->list[i]->owner,
-					files->list[i]->group,"?",files->list[i]->lastModified,files->list[i]->fileName);
-				continue;
-			} 
-			extra = files->list[i]->has_xattr;
-			if (extra == ' ')
-				extra = files->list[i]->has_acl;
-			if (extra == '0')
-				extra = ' ' ;
+			attribute = files->list[i]->has_xattr;
+			if (attribute == ' ')
+				attribute = files->list[i]->has_acl;
+			if (attribute == '0')
+				attribute = ' ' ;
+
 			if (flags->color){
 				color = select_color_new(files->list[i], color_rules);
 				if (!flags->g)
-					printf(FLAG_LCOLOR,files->list[i]->permission, extra, files->list[i]->linkNumber,  files->list[i]->owner,
-						files->list[i]->group, files->list[i]->fileSize, files->list[i]->lastModified, color,files->list[i]->fileName, reset);
+					printf(FLAG_LCOLOR_DYNAMIC,
+						files->list[i]->permission, attribute, 
+						files->list[i]->linkNumber,  
+						(int)dyn_format->max_owner_width,files->list[i]->owner,
+						(int)dyn_format->max_group_width,files->list[i]->group,
+						(int)dyn_format->max_size_width,files->list[i]->fileSize, 
+						files->list[i]->lastModified, color,files->list[i]->fileName, reset);
 				else
-				printf(FLAG_LGCOLOR,files->list[i]->permission, extra, files->list[i]->linkNumber,  
-					files->list[i]->group, files->list[i]->fileSize, files->list[i]->lastModified,color,files->list[i]->fileName, reset);
+				printf(FLAG_LGCOLOR_DYNAMIC,
+					files->list[i]->permission, attribute, files->list[i]->linkNumber,
+					(int)dyn_format->max_group_width,files->list[i]->group,
+					(int)dyn_format->max_size_width,files->list[i]->fileSize,   
+					files->list[i]->lastModified,color,files->list[i]->fileName, reset);
 				
 			} else {
-				if (!flags->g)
-				printf(FLAG_L,files->list[i]->permission, extra, files->list[i]->linkNumber,  files->list[i]->owner,
-					files->list[i]->group, files->list[i]->fileSize, files->list[i]->lastModified, files->list[i]->fileName);
-				else
-				printf(FLAG_LG,files->list[i]->permission, extra, files->list[i]->linkNumber,  
-					files->list[i]->group, files->list[i]->fileSize, files->list[i]->lastModified,files->list[i]->fileName);
+				if (!flags->g){
+					if (!files->list[i]->valid){
+						printf( FLAG_INACCESSIBLE_DYN, 
+							files->list[i]->permission, 
+							' ', 
+							"?", 
+							(int)dyn_format->max_owner_width,files->list[i]->owner,
+							(int)dyn_format->max_group_width,files->list[i]->group,
+							(int)dyn_format->max_size_width,"?",
+							files->list[i]->lastModified,
+							files->list[i]->fileName);
+						continue;
+					} 
+				
+				printf(FLAG_L_DYNAMIC,
+					files->list[i]->permission, attribute, files->list[i]->linkNumber,
+					(int)dyn_format->max_owner_width,files->list[i]->owner, 
+					(int)dyn_format->max_group_width,files->list[i]->group,
+					(int)dyn_format->max_size_width,files->list[i]->fileSize, 
+				  	files->list[i]->lastModified, files->list[i]->fileName);
+				}
+				else{
+					if (!files->list[i]->valid){
+						printf( FLAG_INACCESSIBLE_DYN_G, 
+							files->list[i]->permission, ' ', "?", 
+							/* (int)dyn_format->max_owner_width,files->list[i]->owner, */
+							(int)dyn_format->max_group_width,files->list[i]->group,
+							(int)dyn_format->max_size_width,"?",
+							files->list[i]->lastModified,
+							files->list[i]->fileName);
+						continue;
+					} 
+				
+				printf(FLAG_LG_DYNAMIC,
+					files->list[i]->permission, attribute, files->list[i]->linkNumber,
+					/* (int)dyn_format->max_owner_width,files->list[i]->owner,  */
+					(int)dyn_format->max_group_width,files->list[i]->group,
+					(int)dyn_format->max_size_width,files->list[i]->fileSize, 
+				  	files->list[i]->lastModified, files->list[i]->fileName);
+				}
 			}
 			
 			if (files->list[i]->fileType == 'l' && files->list[i]->link_target_buf[0] != '\0') {

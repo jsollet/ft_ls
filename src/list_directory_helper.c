@@ -6,10 +6,11 @@ void    list_directory(t_flags *flags, t_stack **directories_to_process, t_stack
 	time_t now = time(NULL);
 	t_dyn files;
 	init_dyn(&files);
-	static t_inodeSet inode_set;
-	inode_set_init(&inode_set);
+/* 	static t_inodeSet inode_set;
+	inode_set_init(&inode_set); */
 	static bool first_dir = false;
 	bool need_newline = false;
+	t_dynamic_format dyn_format = {0};
 	// ajout ici 
 	if (*directories_to_process)
 		reverse_stack(directories_to_process);
@@ -29,18 +30,19 @@ void    list_directory(t_flags *flags, t_stack **directories_to_process, t_stack
 		first_dir = true;
 	}
 
-	if (fileList != NULL) {// avant entre les 2 if 
-		process_argument_files(&files, directories_to_process, fileList, flags, exit_status, now);
-		display_sorted_files(true,&files, flags, false);
+	if (fileList != NULL && *fileList != NULL) {
+		process_argument_files(&files, directories_to_process, fileList, flags, exit_status, now, &dyn_format);
+		display_sorted_files(true,&files, flags, false, &dyn_format);
 		reset_dyn(&files);
 	}	
-	if (flags->d){
+	if (flags->d){ // a voir
 		if (fileList)
-			process_argument_files(&files, NULL, fileList, flags, exit_status, now);
+			process_argument_files(&files, NULL, fileList, flags, exit_status, now, &dyn_format);
 		if (directories_to_process)
-			process_argument_files(&files, NULL, directories_to_process, flags, exit_status, now);
+			process_argument_files(&files, NULL, directories_to_process, flags, exit_status, now, &dyn_format);
 		
-		display_sorted_files(true, &files, flags, false);
+		display_sorted_files(true, &files, flags, false, &dyn_format);
+
 		free_dyn(&files);
 		return;
 	} else if (!flags->d)
@@ -50,7 +52,7 @@ void    list_directory(t_flags *flags, t_stack **directories_to_process, t_stack
 				char *current_dir = pop(directories_to_process);
 				if (need_newline)
         			ft_printf("\n");
-				process_directory(current_dir, &files, flags,directories_to_process, first_dir, exit_status, &inode_set, now);
+				process_directory(current_dir, &files, flags,directories_to_process, first_dir, exit_status, /* &inode_set */ now, &dyn_format);
 				need_newline = true;
 				free(current_dir);
 				reset_dyn(&files);
@@ -58,11 +60,12 @@ void    list_directory(t_flags *flags, t_stack **directories_to_process, t_stack
 			}
 		}
 	free_dyn(&files);
-	inode_set_free(&inode_set);
+	//inode_set_free(&inode_set);
 }
 
 
-void	process_argument_files(t_dyn *files,t_stack **directories_to_process, t_stack **fileList, t_flags *flag, t_exit_status *exit_status, time_t now){
+void	process_argument_files(t_dyn *files,t_stack **directories_to_process, t_stack **fileList, t_flags *flag, t_exit_status *exit_status, time_t now, t_dynamic_format *dyn_format){
+	size_t		result;
 	while (*fileList != NULL){
 		char    *file_path = pop(fileList);
 		t_fileData *file = malloc_fileData();
@@ -74,8 +77,21 @@ void	process_argument_files(t_dyn *files,t_stack **directories_to_process, t_sta
 		
 		file->argument = true;
 		file->fileName = ft_strdup(file_path);
+		
 		file->absolutePath = ft_strdup(file_path);
-		get_fileInfo(file_path, file, flag,&files->total_size, exit_status, now ); //
+		get_fileInfo(file_path, file, flag,&files->total_size, exit_status, now, dyn_format ); //
+		if ((result = ft_strlen(file->fileName)) > dyn_format->max_name_width) {
+			dyn_format->max_name_width = result;
+		}
+		if ((result = ft_strlen(file->owner)) > dyn_format->max_owner_width) {
+			dyn_format->max_owner_width = result;
+		}
+		if ((result = ft_strlen(file->group)) > dyn_format->max_group_width) {
+			dyn_format->max_group_width = result;
+		}
+		if ((result = ft_intlen(file->fileSize)) > dyn_format->max_size_width) {
+			dyn_format->max_size_width = result;
+		}
 		if (file->fileType == 'd'  && !flag->d) { // ici modif pour -d
 			push(directories_to_process, file->absolutePath);
 		} else {
@@ -85,16 +101,17 @@ void	process_argument_files(t_dyn *files,t_stack **directories_to_process, t_sta
 	}
 }
 
-void process_directory(const char *dir, t_dyn *files, t_flags *flags, t_stack **directories_to_process, bool first_dir, t_exit_status *exit_status, t_inodeSet *inode_set, time_t now) {
-	bool an_error = list_directory_helper(dir, files, flags, directories_to_process, exit_status, inode_set, now);
+void process_directory(const char *dir, t_dyn *files, t_flags *flags, t_stack **directories_to_process, bool first_dir, t_exit_status *exit_status, /* t_inodeSet *inode_set, */ time_t now, t_dynamic_format *dyn_format) {
+	bool an_error = list_directory_helper(dir, files, flags, directories_to_process, exit_status, /* inode_set, */ now, dyn_format);
 	if (!an_error && (first_dir || flags->bigR))// ajout 
 		ft_printf("%s:\n", dir);
-	display_sorted_files(an_error, files, flags, true);
+
+	display_sorted_files(an_error, files, flags, true, dyn_format);
 }
 
-bool    list_directory_helper(const char *path, t_dyn *files, t_flags *flags, t_stack **directories_to_process, t_exit_status *exit_status, t_inodeSet *inode_set, time_t now) {
+bool    list_directory_helper(const char *path, t_dyn *files, t_flags *flags, t_stack **directories_to_process, t_exit_status *exit_status, /* t_inodeSet *inode_set, */ time_t now, t_dynamic_format *dyn_format) {
 	bool status;
-	(void)inode_set;
+	//(void)inode_set;
 	DIR *dir = opendir(path);
 
 
@@ -130,7 +147,7 @@ bool    list_directory_helper(const char *path, t_dyn *files, t_flags *flags, t_
 
 		if (!flags->a && (ft_strcmp(entry->d_name, "..") == 0 || entry->d_name[0] == '.')) { continue;}
 
-		t_fileData *file = create_fileData(path, entry, flags, &files->total_size, exit_status, now);
+		t_fileData *file = create_fileData(path, entry, flags, &files->total_size, exit_status, now, dyn_format);
 		if (!file){
 			if (errno)
         		perror("create_fileData");
@@ -142,11 +159,6 @@ bool    list_directory_helper(const char *path, t_dyn *files, t_flags *flags, t_
 			return status;
 		}
 
-		/* if (inode_set_contains(inode_set, file->st_ino )){
-			free_fileData(file);
-			continue;
-		} 
-		inode_set_add(inode_set, entry->d_ino); */
 		// Si c'est un répertoire, l'ajouter à la pile
 		if (flags->bigR && file->fileType == 'd' && ft_strcmp(entry->d_name, "..") != 0 && ft_strcmp(entry->d_name, ".") != 0)
 		{
@@ -175,23 +187,23 @@ bool    list_directory_helper(const char *path, t_dyn *files, t_flags *flags, t_
 	}
 
 	free_dyn(&subdirs);
-	return false; // pas d'erreur
+	return false;
 }
 
 
-t_fileData	*create_fileData(const char *dir_path, struct dirent *entry,t_flags *flag, long *total_size, t_exit_status *exit_status, time_t now){
+t_fileData	*create_fileData(const char *dir_path, struct dirent *entry,t_flags *flag, long *total_size, t_exit_status *exit_status, time_t now,  t_dynamic_format *dyn_format){
 	t_fileData *file = malloc_fileData();
 	if (!file) return NULL;
 
 	file->d_type = entry->d_type;
 	file->fileName = ft_strdup(entry->d_name);
 	char *fullPath = ft_strjoin_multiple(dir_path, "/", entry->d_name, NULL);
-	//ft_strlcpy(file->absolutePath, fullPath,PATH_MAX + 1);
-	file->absolutePath = fullPath;//ft_strdup(fullPath); 
+	
+	file->absolutePath = fullPath; 
 
 	errno = 0;
-	get_fileInfo(fullPath,file,flag,total_size, exit_status, now);
-	//free(fullPath);
+	get_fileInfo(fullPath,file,flag,total_size, exit_status, now, dyn_format);
+
 	return file;
 }
 
@@ -199,11 +211,9 @@ bool	handle_subdir(t_dyn *subdirs, t_fileData *file) {
 
 	t_fileData *subdir = malloc_fileData();
 	if (!subdir) return false;
-	//subdir->fileName = ft_strdup(file->fileName);
-	//clean_path(file->absolutePath);
 
-	subdir->fileName = ft_strdup(file->absolutePath); // On stocke juste le chemin absolu, pour le tri !
-	//ft_strlcpy(subdir->absolutePath, file->absolutePath, sizeof(file->absolutePath) );//
+
+	subdir->fileName = ft_strdup(file->absolutePath);
 	subdir->absolutePath = ft_strdup(file->absolutePath);
 	subdir->owner[0] = '\0';
 	subdir->group[0] = '\0';

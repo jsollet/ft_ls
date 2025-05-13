@@ -34,24 +34,6 @@ bool is_char_device(t_fileData *file){
     return file->permission[0] == 'c';
 }
 
-void	display_file_in_color(t_fileData *file, t_flags *flags, char *fileName){
-	const char *color = RESET_COLOR;
-	if (flags->color)
-	{
-        if (file->fileType == 'd') {
-            color = BLUE_COLOR;  // Dossiers en bleu
-        } else if (file->fileType == 'x') {
-            color = GREEN_COLOR; // Fichiers exécutables en vert
-        } else if (file->fileType == 'l') {
-            color = CYAN_COLOR; // Liens symboliques en jaune
-        }
-    }
-	ft_printf("%s%s%s", color, fileName, RESET_COLOR);
-}
-
-// a ameliorer...
-
-
 char	*select_color_new(t_fileData *file, t_color_rule *color_rules){
 	for (int i = 0; color_rules[i].type != 0; i++) {
         if (file->fileType == color_rules[i].type) {

@@ -3,7 +3,7 @@
 
 void    init_dyn(t_dyn *list)
 {
-	list->capacity = 256; // 1000000
+	list->capacity = 256;
 	list->length = 0;
 	list->total_size = 0;
 	list->list = malloc(list->capacity * sizeof(t_fileData *));

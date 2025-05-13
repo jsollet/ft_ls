@@ -138,34 +138,24 @@ void	fill_inaccessible_fileInfo(t_fileData *file, const char *name){
 	ft_memset(file->permission, '?', 10); file->permission[10] = '\0';
 	ft_memset(file->lastModified, '?',19); file->lastModified[19] = '\0';
 	
-	/* if (is_directory(name)){
-		file->permission[0] = 'd';
-	} else {
-		file->permission[0] = '-';
-	} */
 	if (file->d_type != DT_UNKNOWN) {
         file->permission[0] = convert_d_type_to_char(file->d_type);
     } else {
-        // Si d_type est inconnu, on utilise is_directory pour déterminer si c'est un répertoire
+        
         if (is_directory(name)) {
             file->permission[0] = 'd';
         } else {
             file->permission[0] = '-';
         }
     }
-	/* file->permission[0] = file->d_type;
-	printf("d_type %c\n",file->d_type); */
+
 	file->fileSize = 0;
 	file->linkNumber = 0;
-
 	file->owner[0] = '?';file->owner[1] = '\0';
 	file->group[0] = '?';file->group[1] = '\0';
 	file->lastModified[0] = '?';file->lastModified[1] = '\0';
-	//ft_strlcpy(file->owner, "?", 3 /* sizeof(file->owner) */);
-	//ft_strlcpy(file->group, "?", 3 /* sizeof(file->group) */);
-	//ft_strlcpy(file->lastModified, "?", 1); //
 
-	file->valid = false; // a voir
+	file->valid = false;
 }
 
 void fill_permissions(t_fileData *file, struct stat *sfile){
@@ -176,15 +166,13 @@ void fill_permissions(t_fileData *file, struct stat *sfile){
 
 void fill_extended_attrs(t_fileData *file, t_flags *flag, t_exit_status *exit_status){
 	file->acl_text = NULL;
-	file->has_xattr = ' ';// ajout
-	file->has_acl = ' ';// ajout
-	// if (flag->acl || flag->attr || flag->extended || flag->e || flag->at)
-	// ajout 
+	file->has_xattr = ' ';
+	file->has_acl = ' ';
+
 	if (flag->attr || flag->extended ||  flag->at) {
 		file->has_xattr= has_xattr(file->absolutePath, exit_status);
 		if (file->has_xattr == '@') {
 			get_xattr(file, exit_status);
-			//if (status == 1){return 1;}
 		}
 	}
 	#ifdef __APPLE__
@@ -195,7 +183,6 @@ void fill_extended_attrs(t_fileData *file, t_flags *flag, t_exit_status *exit_st
 		if (file->has_acl == '+')
 		{
 			file->acl_text = format_acl_text(tmp);
-			//free(tmp);
 		}
 		free(tmp);
 	}
@@ -211,21 +198,16 @@ void fill_last_modified(t_fileData *file, const struct stat *sfile, char flag_la
 		return;
 	}
 
-	// ctime() retourne toujours une chaîne de 26 caractères, terminée par '\n' + '\0'
-	// Ex: "Wed Jun 30 21:49:08 1993\n\0"
-	// On évite ft_strlen ici, on sait que la \n est à la position 24
 	char timeBuf[26];
 	ft_memcpy(timeBuf, timeStr, 25);
 	timeBuf[24] = '\0'; // remplace \n
 
 	if (now - timeStamp > SIX_MONTHS_IN_SECONDS) {
-		// "Jun 30 1993" → mois (4 à 6), jour (8 à 9), année (20 à 23)
-		ft_strlcpy(file->lastModified, timeBuf + 4, 8);        // "Jun 30"
+		ft_strlcpy(file->lastModified, timeBuf + 4, 8);
 		ft_strlcat(file->lastModified, " ", sizeof(file->lastModified));
-		ft_strlcat(file->lastModified, timeBuf + 20, sizeof(file->lastModified)); // "1993"
+		ft_strlcat(file->lastModified, timeBuf + 20, sizeof(file->lastModified));
 	} else {
-		// "Jun 30 21:49"
-		ft_strlcpy(file->lastModified, timeBuf + 4, 13); // 12 + 1 pour \0
+		ft_strlcpy(file->lastModified, timeBuf + 4, 13);
 	}
 }
 
@@ -239,10 +221,10 @@ void fill_symlink_target(const char *path, t_fileData *file, t_exit_status *exit
 	}		
 }
 
-void    get_fileInfo(const char* path, t_fileData *file,  t_flags *flag,long *total_size, t_exit_status *exit_status, time_t now){ // voir pour enlever ou pas FAKE
+void    get_fileInfo(const char* path, t_fileData *file,  t_flags *flag,long *total_size, t_exit_status *exit_status, time_t now,  t_dynamic_format *dyn_format){
 	
 	struct stat sfile;
-
+	size_t result;
 	char	flag_label;
 	if (flag->u) flag_label = 'u';
 	else flag_label = 't';
@@ -250,7 +232,6 @@ void    get_fileInfo(const char* path, t_fileData *file,  t_flags *flag,long *to
 	if (!fill_stat_data(path, &sfile, file, exit_status))
 		return;
 
-	//file->valid = true;
 	fill_basic_info(file, &sfile, total_size);
 	fill_user_group_info(file, &sfile, exit_status);
 
@@ -260,4 +241,16 @@ void    get_fileInfo(const char* path, t_fileData *file,  t_flags *flag,long *to
 	}
 	fill_last_modified(file, &sfile, flag_label, now);
 	fill_symlink_target(path, file, exit_status);
+	if ((result = ft_strlen(file->fileName)) > dyn_format->max_name_width) {
+		dyn_format->max_name_width = result;
+	}
+	if ((result = ft_strlen(file->owner)) > dyn_format->max_owner_width) {
+		dyn_format->max_owner_width = result;
+	}
+	if ((result = ft_strlen(file->group)) > dyn_format->max_group_width) {
+		dyn_format->max_group_width = result;
+	}
+	if ((result = ft_intlen(file->fileSize)) > dyn_format->max_size_width) {
+		dyn_format->max_size_width = result;
+	}
 } 

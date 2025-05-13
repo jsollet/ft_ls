@@ -76,14 +76,4 @@ void inode_set_free(t_inodeSet *set) {
 	}
 }
 
-void debug_print_inode_stats(void) {
-	extern size_t inode_set_hits;
-	extern size_t inode_set_misses;
 
-	printf("INODE SET: [%d] hits = %zu, misses = %zu, ratio = %.2f%%\n",
-		INODE_HASH_SIZE,
-		inode_set_hits,
-		inode_set_misses,
-		inode_set_hits + inode_set_misses == 0 ? 0.0 :
-		(100.0 * inode_set_hits) / (inode_set_hits + inode_set_misses));
-}
