@@ -2,6 +2,7 @@
 #include "../includes/types.h"
 #include "../includes/column_view.h"
 #include "../libft/includes/libftprintf.h"
+#include "../includes/ft_printf1.h"
 
 // les parametres a voir sous linux t->col_width surtout ;
 
@@ -35,10 +36,10 @@ void    print_files_in_columns(char **files, t_term *t, char **color) {
 			size_t index = col * rows + row;
 			if (index < t->count) {
 				
-				ft_printf("%s", color[index]);
+				ft_printf1("%s", color[index]);
 				ssize_t _unused = write(1, files[index], ft_strlen(files[index]));
 				(void)_unused;
-				ft_printf("%s", reset);
+				ft_printf1("%s", reset);
 				
 				int space_count = t->col_width - ft_strlen(files[index]);
 				for (int j = 0; j < space_count; j++) {
@@ -64,7 +65,7 @@ void	list_directory_line(char *arr[], char *color[],int arr_length){
 	const char *reset = RESET_COLOR;
 	int	i = 0;
 	while (i < arr_length){
-		ft_printf_fd(1, "%s%s%s\n", color[i], arr[i], reset);
+		ft_printf1( "%s%s%s\n", color[i], arr[i], reset);
 		i++;
 	}
 }

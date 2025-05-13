@@ -1,5 +1,6 @@
 
 #include "../includes/display.h"
+#include "../includes/ft_printf1.h"
 
 void display_sorted_files(bool an_error,t_dyn *files, t_flags *flags, bool is_directory, t_dynamic_format *dyn_format) {
 	char *reset = RESET_COLOR;
@@ -30,9 +31,9 @@ void display_sorted_files(bool an_error,t_dyn *files, t_flags *flags, bool is_di
 		
 		if (is_directory && files->length >= 0  && !an_error) {
 			#ifdef __APPLE__
-				ft_printf("total %lld\n", files->total_size);
+				ft_printf1("total %lld\n", files->total_size);
 			#else
-				ft_printf("total %lld\n", files->total_size/ 2);
+				ft_printf1("total %lld\n", files->total_size/ 2);
 			#endif
 			}
 		
@@ -46,7 +47,7 @@ void display_sorted_files(bool an_error,t_dyn *files, t_flags *flags, bool is_di
 			if (flags->color){
 				color = select_color_new(files->list[i], color_rules);
 				if (!flags->g)
-					printf(FLAG_LCOLOR_DYNAMIC,
+					ft_printf1(FLAG_LCOLOR_DYNAMIC,
 						files->list[i]->permission, attribute, 
 						files->list[i]->linkNumber,  
 						(int)dyn_format->max_owner_width,files->list[i]->owner,
@@ -54,7 +55,7 @@ void display_sorted_files(bool an_error,t_dyn *files, t_flags *flags, bool is_di
 						(int)dyn_format->max_size_width,files->list[i]->fileSize, 
 						files->list[i]->lastModified, color,files->list[i]->fileName, reset);
 				else
-				printf(FLAG_LGCOLOR_DYNAMIC,
+				ft_printf1(FLAG_LGCOLOR_DYNAMIC,
 					files->list[i]->permission, attribute, files->list[i]->linkNumber,
 					(int)dyn_format->max_group_width,files->list[i]->group,
 					(int)dyn_format->max_size_width,files->list[i]->fileSize,   
@@ -63,7 +64,7 @@ void display_sorted_files(bool an_error,t_dyn *files, t_flags *flags, bool is_di
 			} else {
 				if (!flags->g){
 					if (!files->list[i]->valid){
-						printf( FLAG_INACCESSIBLE_DYN, 
+						ft_printf1( FLAG_INACCESSIBLE_DYN, 
 							files->list[i]->permission, 
 							' ', 
 							"?", 
@@ -75,7 +76,7 @@ void display_sorted_files(bool an_error,t_dyn *files, t_flags *flags, bool is_di
 						continue;
 					} 
 				
-				printf(FLAG_L_DYNAMIC,
+				ft_printf1(FLAG_L_DYNAMIC,
 					files->list[i]->permission, attribute, files->list[i]->linkNumber,
 					(int)dyn_format->max_owner_width,files->list[i]->owner, 
 					(int)dyn_format->max_group_width,files->list[i]->group,
@@ -84,7 +85,7 @@ void display_sorted_files(bool an_error,t_dyn *files, t_flags *flags, bool is_di
 				}
 				else{
 					if (!files->list[i]->valid){
-						printf( FLAG_INACCESSIBLE_DYN_G, 
+						ft_printf1( FLAG_INACCESSIBLE_DYN_G, 
 							files->list[i]->permission, ' ', "?", 
 							/* (int)dyn_format->max_owner_width,files->list[i]->owner, */
 							(int)dyn_format->max_group_width,files->list[i]->group,
@@ -94,7 +95,7 @@ void display_sorted_files(bool an_error,t_dyn *files, t_flags *flags, bool is_di
 						continue;
 					} 
 				
-				printf(FLAG_LG_DYNAMIC,
+				ft_printf1(FLAG_LG_DYNAMIC,
 					files->list[i]->permission, attribute, files->list[i]->linkNumber,
 					/* (int)dyn_format->max_owner_width,files->list[i]->owner,  */
 					(int)dyn_format->max_group_width,files->list[i]->group,
@@ -104,17 +105,17 @@ void display_sorted_files(bool an_error,t_dyn *files, t_flags *flags, bool is_di
 			}
 			
 			if (files->list[i]->fileType == 'l' && files->list[i]->link_target_buf[0] != '\0') {
-				printf(" -> %s", files->list[i]->link_target_buf);
+				ft_printf1(" -> %s", files->list[i]->link_target_buf);
 			}
 			if (flags->e && files->list[i]->acl_text){ // ici peut etre pour afficher avec l'option @
-				printf("\n%s\n", files->list[i]->acl_text);
+				ft_printf1("\n%s\n", files->list[i]->acl_text);
 			}
 			if (flags->at && files->list[i]->has_xattr== '@'){
 				for (int j=0;j < files->list[i]->xattr_count; j++){
-					printf("\n\t%s\t%zd", files->list[i]->xattrs[j].name, files->list[i]->xattrs[j].size);
+					ft_printf1("\n\t%s\t%zd", files->list[i]->xattrs[j].name, files->list[i]->xattrs[j].size);
 				}
 			}
-			printf("\n");
+			ft_printf1("\n");
 		}
 	} else {
 		char *arr[files->length];
