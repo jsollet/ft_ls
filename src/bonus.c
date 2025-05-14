@@ -47,8 +47,6 @@ void 	get_xattr(t_fileData *file,  t_exit_status *exit_status){
 	int		count = 0;
 	int		i = 0;
 
-
-
 	if (size < 0) {
 		set_exit_status(exit_status, 1, "NULL");
         return;
@@ -114,6 +112,7 @@ char has_xattr(const char *path, t_exit_status *exit_status)
         }
     #endif
 }
+
 #ifdef __APPLE__
 char	has_acl(const char *path, char **text, t_exit_status *exit_status)
 {

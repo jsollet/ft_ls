@@ -1,17 +1,6 @@
 #include "../includes/format_utils.h"
 #include "../includes/buffer.h"
 
-
-intmax_t get_signed_arg(va_list *args, t_printf_length length) {
-    if (length == ll) return va_arg(*args, long long);
-    if (length == l)  return va_arg(*args, long);
-    if (length == hh) return (signed char)va_arg(*args, int);
-    if (length == h)  return (short)va_arg(*args, int);
-    if (length == j)  return va_arg(*args, intmax_t);
-    if (length == t)  return va_arg(*args, ptrdiff_t);
-    return va_arg(*args, int);
-}
-
 uintmax_t get_unsigned_arg(va_list args, t_printf_length length) {
     if (length == ll) return va_arg(args, unsigned long long);
     if (length == l)  return va_arg(args, unsigned long);
@@ -22,7 +11,6 @@ uintmax_t get_unsigned_arg(va_list args, t_printf_length length) {
     if (length == t)  return (uintmax_t)va_arg(args, ptrdiff_t);
     return va_arg(args, unsigned int);
 }
-
 
 int utoa_base(uintmax_t val, t_buffer *buf, int base, bool lower, t_format_number *format){
     const char *digits = lower ? "0123456789abcdef" : "0123456789ABCDEF";
@@ -115,28 +103,13 @@ void emit_prefix(t_format_number *format, t_buffer *buf) {
     }
 }
 
-void compute_padding_zero_old(t_conversion *conv, t_format_number *format) {
-    if (conv->precision.is_star || conv->precision.value >= 0) {
-        format->padding_zero = (conv->precision.value > format->number_len)
-            ? conv->precision.value - format->number_len : 0;
-    } else if ((conv->combined_flags & ZERO) && !(conv->combined_flags & MINUS)) {
-        size_t total_len = format->prefix_len + format->number_len + (format->sign_char ? 1 : 0);
-        format->padding_zero = (conv->width.value > (int)total_len)
-            ? conv->width.value - total_len : 0;
-    } else {
-        format->padding_zero = 0;
-    }
-}
-
 void compute_padding_zero(t_conversion *conv, t_format_number *format) {
-    if (format->is_zero_value && conv->precision.value == 0) {
+    if (format->is_zero_value && conv->precision.value == 0 && conv->has_precision) {
         format->number_len = 0;
         format->emit_number = false;
         format->padding_zero = 0;
         return;
     }
-
-
     if (conv->has_precision) {
         format->padding_zero = (conv->precision.value > format->number_len)
             ? conv->precision.value - format->number_len : 0;
@@ -151,16 +124,13 @@ void compute_padding_zero(t_conversion *conv, t_format_number *format) {
     }
 }
 
-
-
-
 void emit_padding_zeros(t_format_number *format, t_buffer *buf) {
     buf_putnchar(buf, '0', format->padding_zero);
 }
 
 void compute_padding_space(t_conversion *conv, t_format_number *format) {
     size_t total_len = format->prefix_len + format->number_len
-                     + format->padding_zero + (format->sign_char ? 1 : 0);
+                    + format->padding_zero + (format->sign_char ? 1 : 0);
 
     if (conv->width.value >(int) total_len)
         format->padding_space = conv->width.value - total_len;
@@ -187,11 +157,8 @@ void emit_sign(intmax_t value, t_conversion *conv, t_format_number *format, t_bu
     }
 }
 
-void emit_sign_u(uintmax_t value, t_conversion *conv, t_format_number *format, t_buffer *buf) {
-    if (value < 0) {
-        buf_putchar(buf, '-');
-        format->sign_char = '-';
-    } else if (conv->combined_flags & PLUS) {
+void emit_sign_u( t_conversion *conv, t_format_number *format, t_buffer *buf) {
+    if (conv->combined_flags & PLUS) {
         buf_putchar(buf, '+');
         format->sign_char = '+';
     } else if (conv->combined_flags & SPACE) {
@@ -214,9 +181,7 @@ void    compute_sign(intmax_t value, t_conversion *conv, t_format_number *format
     }
 }
 
-void    compute_sign_u(uintmax_t value, t_conversion *conv, t_format_number *format){
-    (void)value;
-
+void    compute_sign_u(t_conversion *conv, t_format_number *format){
     if (conv->combined_flags & PLUS) {
         format->sign_char = '+';
     } else if (conv->combined_flags & SPACE) {
@@ -306,24 +271,24 @@ void emit_unsigned_integer(uintmax_t value, t_conversion *conv, t_buffer *buf) {
     } 
 
     build_prefix(value, &number_buf, conv, &format);
-    compute_sign_u(value, conv, &format);
+    compute_sign_u(conv, &format);
     compute_padding_zero(conv, &format);
     compute_padding_space(conv, &format);
 
     if (!(conv->combined_flags & MINUS)) {
         if ((conv->combined_flags & ZERO) && conv->precision.value < 0) {
 
-            emit_sign_u(value, conv, &format, buf);
+            emit_sign_u(conv, &format, buf);
             emit_prefix(&format, buf);
             emit_padding_zeros(&format, buf);
         } else {
             emit_padding_space(&format, buf);
-            emit_sign_u(value, conv, &format, buf);
+            emit_sign_u( conv, &format, buf);
             emit_prefix(&format, buf);
             emit_padding_zeros(&format, buf);
         }
     } else {
-        emit_sign_u(value, conv, &format, buf);
+        emit_sign_u(conv, &format, buf);
         emit_prefix(&format, buf);
         emit_padding_zeros(&format, buf);
     }
@@ -371,7 +336,6 @@ int format_unsigned_base(uintmax_t val, char *buf, int base, bool lower, t_conve
         }
     }
 
-    
     int prefix_len = 0;
     if (conv && (conv->combined_flags & SHARP)) {
         if (base == 16) {
@@ -391,8 +355,6 @@ int format_unsigned_base(uintmax_t val, char *buf, int base, bool lower, t_conve
     return prefix_len + i;
 }
 
-
-// string...
 void    prepare_format_string(const char *str, t_format_string *format,  t_conversion *conv){
     if (!str){
         format->str = "(null)";
@@ -405,20 +367,16 @@ void    prepare_format_string(const char *str, t_format_string *format,  t_conve
     format->original_len = ft_strlen(format->str);
     format->precision_len = format->original_len;
 
-
     if (conv->has_precision && conv->precision.value >= 0) {
         if (conv->precision.value < format->original_len)
             format->precision_len = conv->precision.value;
         else
             format->precision_len = format->original_len;
     }
-
     int display_len = format->precision_len;
-
     int total_padding = (conv->width.value > display_len)
         ? conv->width.value - display_len
         : 0;
-
 
     if (conv->combined_flags & MINUS){
         format->padding_left = 0;
@@ -433,18 +391,14 @@ void    emit_string(const char *str, t_conversion *conv, t_buffer *buf){
     t_format_string format = {0};
     prepare_format_string(str, &format, conv);
     if (conv->combined_flags & MINUS) {
-        // left-justify: text then padding
         buf_putstrn(buf, format.str, format.precision_len);
         buf_putnchar(buf, ' ', format.padding_right);
     } else {
-        // right-justify: padding then text
         buf_putnchar(buf, ' ', format.padding_left);
         buf_putstrn(buf, format.str, format.precision_len);
     }
 }
 
-
-// char
 void prepare_format_char( int c, t_format_char *fmt, t_conversion *conv) {
     fmt->c = (char)c;
     fmt->is_null_char = (fmt->c == '\0');

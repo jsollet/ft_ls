@@ -1,18 +1,18 @@
 SRCDIR = src
 OBJDIR = obj
-INCDIR = includes #eventuellement les header de ft_ls
+INCDIR = includes
 
 LIBFT_DIR = ./libft
 LIBFT = $(LIBFT_DIR)/libft.a
 
 # Trouver tous les fichiers sources
-SRCS = $(wildcard $(SRCDIR)/*.c) $(wildcard sort/*.c) #dernier ajouté, donc que ca a modifier
+SRCS = $(wildcard $(SRCDIR)/*.c)# $(wildcard sort/*.c) #dernier ajouté, donc que ca a modifier
 
 # Création des objets correspondants
 OBJS = $(SRCS:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 
 # Fichier d'en-tête
-HEADER = $(INCDIR) #a voir
+HEADER = $(INCDIR)
 
 NAME = ft_ls
 
@@ -20,7 +20,7 @@ NAME = ft_ls
 RM = rm -f
 MKDIR = mkdir -p
 CC = gcc
-CFLAGS = -g -Wall -Wextra -Werror -I$(INCDIR) -O3 #-fsanitize=address #-fprofile-instr-generate -fcoverage-mapping
+CFLAGS = -g  -Wall -Wextra -Werror -I$(INCDIR) -O3 #-fsanitize=address #-fprofile-instr-generate -fcoverage-mapping
 
 all: $(LIBFT) $(NAME)
 

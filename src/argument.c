@@ -26,8 +26,6 @@ int find_double_dash(int argc, char *argv[]) {
 	return argc;
 }
 
-
-
 bool process_path(t_stack **dirs, t_stack **files, char *path, t_exit_status *exit_status) {
 	struct stat st;
 	if (lstat(path, &st) == -1) {

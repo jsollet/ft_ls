@@ -27,10 +27,6 @@ int buf_grow(t_buffer *buf, size_t required_space) {
     return 0;
 }
 
-
-
-
-
 int buf_ensure_space(t_buffer *buf, size_t required_space) {
     while (buf->capacity - buf->length < required_space) {
         if (buf->is_fixed){
@@ -44,17 +40,13 @@ int buf_ensure_space(t_buffer *buf, size_t required_space) {
                     return -1;
             }
         }
-         else { // Pour BUF_DYNAMIC_STRING et autres futurs dynamiques
+        else {
             if (buf_grow(buf, required_space) < 0)
                 return -1;
         }
     }
     return 0;
 }
-
-
-
-
 
 int buf_init_fixed(t_buffer *buf, char *prealloc, size_t size, t_buf_content_type type) {
     buf->is_dynamic = false;
@@ -67,9 +59,6 @@ int buf_init_fixed(t_buffer *buf, char *prealloc, size_t size, t_buf_content_typ
     buf->is_fixed = true;
     return 0;
 }
-
-
-
 
 int	buf_init_fd(t_buffer *buf, int fd, t_buf_content_type type){
     buf->is_dynamic = true;
@@ -85,7 +74,6 @@ int	buf_init_fd(t_buffer *buf, int fd, t_buf_content_type type){
     return 0;
 }
 
-
 int buf_init_dynamic(t_buffer *buf, t_buf_content_type type) {
     buf->data = malloc(INITIAL_CAPACITY);
     if (!buf->data)
@@ -100,9 +88,6 @@ int buf_init_dynamic(t_buffer *buf, t_buf_content_type type) {
     return 0;
 }
 
-
-
-
 int buf_flush(t_buffer *buf) {
     if (buf->length == 0)
         return 0;
@@ -113,9 +98,7 @@ int buf_flush(t_buffer *buf) {
     return 0;
 }
 
-
 int buf_putchar(t_buffer *buf, char c) {
-
     if (buf_ensure_space(buf, 1) < 0)
         return -1;
     buf->data[buf->length++] = c;
@@ -146,6 +129,7 @@ int buf_putnchar(t_buffer *buf, char c, size_t remaining) {
     }
     return 0;
 }
+
 int buf_putstrn(t_buffer *buf, const char *str, size_t remaining) {
     while (remaining > 0) {
         if (buf_ensure_space(buf, remaining) < 0)
@@ -165,10 +149,7 @@ int buf_putstrn(t_buffer *buf, const char *str, size_t remaining) {
     return 0;
 }
 
-
-
-
 int buf_putstr(t_buffer *buf, const char *str) {
-    size_t len = strlen(str);
+    size_t len = ft_strlen(str);
     return buf_putstrn(buf, str, len);
 }

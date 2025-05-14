@@ -15,14 +15,13 @@ void display_sorted_files(bool an_error,t_dyn *files, t_flags *flags, bool is_di
 		{'p', NULL, YELLOW_COLOR},
 		{'b', NULL, RED_COLOR},
 		{'c', NULL, RED_COLOR},
-		{'-', is_executable, GREEN_COLOR}, // si fichier normal mais exécutable
-		{0, NULL, RESET_COLOR} // Fin de la table
+		{'-', is_executable, GREEN_COLOR},
+		{0, NULL, RESET_COLOR}
 	};
 
 	char attribute ;
 	char *format = ft_strdup("%-10s %3ld %-10s %10s %7ld %-20s %-30s");
-	if (!flags->U){ // trie la liste des fichiers et dossier dans le repertoire courant
-		
+	if (!flags->U){
 		int (*cmp)(t_fileData *, t_fileData *) = get_cmp_func(flags);
 		mergeSort_iterative(files->list, files->length, cmp);
 	}
@@ -43,7 +42,8 @@ void display_sorted_files(bool an_error,t_dyn *files, t_flags *flags, bool is_di
 				attribute = files->list[i]->has_acl;
 			if (attribute == '0')
 				attribute = ' ' ;
-
+			
+			
 			if (flags->color){
 				color = select_color_new(files->list[i], color_rules);
 				if (!flags->g)
@@ -75,7 +75,6 @@ void display_sorted_files(bool an_error,t_dyn *files, t_flags *flags, bool is_di
 							files->list[i]->fileName);
 						continue;
 					} 
-				
 				ft_printf1(FLAG_L_DYNAMIC,
 					files->list[i]->permission, attribute, files->list[i]->linkNumber,
 					(int)dyn_format->max_owner_width,files->list[i]->owner, 
@@ -87,7 +86,6 @@ void display_sorted_files(bool an_error,t_dyn *files, t_flags *flags, bool is_di
 					if (!files->list[i]->valid){
 						ft_printf1( FLAG_INACCESSIBLE_DYN_G, 
 							files->list[i]->permission, ' ', "?", 
-							/* (int)dyn_format->max_owner_width,files->list[i]->owner, */
 							(int)dyn_format->max_group_width,files->list[i]->group,
 							(int)dyn_format->max_size_width,"?",
 							files->list[i]->lastModified,
@@ -97,7 +95,6 @@ void display_sorted_files(bool an_error,t_dyn *files, t_flags *flags, bool is_di
 				
 				ft_printf1(FLAG_LG_DYNAMIC,
 					files->list[i]->permission, attribute, files->list[i]->linkNumber,
-					/* (int)dyn_format->max_owner_width,files->list[i]->owner,  */
 					(int)dyn_format->max_group_width,files->list[i]->group,
 					(int)dyn_format->max_size_width,files->list[i]->fileSize, 
 				  	files->list[i]->lastModified, files->list[i]->fileName);
@@ -107,7 +104,7 @@ void display_sorted_files(bool an_error,t_dyn *files, t_flags *flags, bool is_di
 			if (files->list[i]->fileType == 'l' && files->list[i]->link_target_buf[0] != '\0') {
 				ft_printf1(" -> %s", files->list[i]->link_target_buf);
 			}
-			if (flags->e && files->list[i]->acl_text){ // ici peut etre pour afficher avec l'option @
+			if (flags->e && files->list[i]->acl_text){
 				ft_printf1("\n%s\n", files->list[i]->acl_text);
 			}
 			if (flags->at && files->list[i]->has_xattr== '@'){

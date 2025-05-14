@@ -12,7 +12,7 @@ int ft_strcmp(const char *s1, const char *s2)
 }
 
 void build_lookup_table(const char *set, bool table[CHAR_RANGE]) {
-    memset(table, 0, CHAR_RANGE); // Initialise tout à false
+    memset(table, 0, CHAR_RANGE);
     if (set == NULL)
         return;
     for (size_t i = 0; set[i]; ++i)
@@ -93,11 +93,10 @@ char *ft_strnchr(const char *str, int c, size_t end) {
 }
 
 char *ft_strndup_range(const char *str, size_t start, size_t end){
-    // version avec bornes ouvertes ([start, end))
     if (!str || start > end || ft_strlen(str) <= end)
         return NULL;
 
-    size_t len = end - start; // +1 avec borne fermee
+    size_t len = end - start;
     char *dest;
 
     dest = malloc((len + 1) * sizeof(char));
@@ -105,7 +104,7 @@ char *ft_strndup_range(const char *str, size_t start, size_t end){
         return NULL;
     ft_memcpy(dest, str + start,len);
     dest[len] = '\0';
-    //printf("[\n%s\n]", dest);
+    
     return dest;
 }
 
@@ -144,7 +143,6 @@ bool starts_with_case_insensitive(const char *str, const char *prefix) {
         char a = str[i];
         char b = prefix[i];
 
-        // On convertit en minuscule sans utiliser ctype.h
         if (a >= 'A' && a <= 'Z')
             a += 32;
         if (b >= 'A' && b <= 'Z')
@@ -174,8 +172,8 @@ bool ends_with_case_insensitive(const char *str, const char *suffix) {
     if (!str || !suffix)
         return false;
 
-    size_t len_str = strlen(str);
-    size_t len_suf = strlen(suffix);
+    size_t len_str = ft_strlen(str);
+    size_t len_suf = ft_strlen(suffix);
 
     if (len_suf > len_str)
         return false;
@@ -197,14 +195,14 @@ bool ends_with_case_insensitive(const char *str, const char *suffix) {
     return true;
 }
 
-// a voir si c' est utile !
+
 char *ft_strchrnul(const char *s, int c) {
     while (*s) {
         if (*s == (char)c)
             return (char *)s;
         s++;
     }
-    return (char *)s; // Pointeur sur le '\0'
+    return (char *)s;
 }
 
 size_t ft_strcspn(const char *s, const char *reject) {
@@ -259,8 +257,8 @@ bool contains_case_insensitive(const char *haystack, const char *needle) {
 	if (!haystack || !needle)
 		return false;
 
-	size_t hay_len = strlen(haystack);
-	size_t needle_len = strlen(needle);
+	size_t hay_len = ft_strlen(haystack);
+	size_t needle_len = ft_strlen(needle);
 
 	if (needle_len == 0)
 		return true;
@@ -278,7 +276,7 @@ size_t skip_while(const char *str, const char *set, size_t start){
     if (!str || !set || ft_strlen(str) <= start)
         return start;
     
-    if (*set == '\0')  // Si set est vide, on renvoie simplement start
+    if (*set == '\0')
         return start;
     size_t i = start;
 
@@ -287,7 +285,7 @@ size_t skip_while(const char *str, const char *set, size_t start){
         size_t j = 0;
         while (set[j] && str[i] != set[j])
             j++;
-        if (!set[j]) // pas trouvé dans set
+        if (!set[j])
             break;
         i++;
     }
@@ -299,7 +297,7 @@ size_t skip_until(const char *str, const char *set, size_t start){
         return start;
     size_t i = start;
 
-    if (*set == '\0')  // Si set est vide, on renvoie simplement start
+    if (*set == '\0')
         return start;
 
     while (str[i])
@@ -307,7 +305,7 @@ size_t skip_until(const char *str, const char *set, size_t start){
         size_t j = 0;
         while (set[j] && str[i] != set[j])
             j++;
-        if (!set[j]){ // pas trouvé dans set
+        if (!set[j]){
             i++;
             continue;
         } else {
@@ -358,18 +356,17 @@ char *ft_strtok_custom(const char *s, const char *delims, size_t *start) {
 
     size_t i = *start;
 
-    // Skip leading delimiters
     while (s[i] && ft_strchr(delims, s[i]))
         i++;
 
     if (s[i] == '\0') {
         *start = i;
-        return NULL; // No more tokens
+        return NULL;
     }
 
     size_t token_start = i;
 
-    // Move forward until we find a delimiter or reach end of string
+
     while (s[i] && !ft_strchr(delims, s[i]))
         i++;
 
@@ -381,15 +378,10 @@ char *ft_strtok_custom(const char *s, const char *delims, size_t *start) {
     ft_memcpy(token, s + token_start, token_len);
     token[token_len] = '\0';
 
-    *start = i; // Update position to next scan point
+    *start = i;
     return token;
 }
 
-// 
-
-
-// Optionnelles (non implémentées mais déclarées pour l'avenir) voir avec gpt
-// https://chatgpt.com/c/68015bdc-cb3c-8011-86a2-67e1b9f6a1b4
 bool starts_with_ci(const char *str, const char *prefix) {
     if (!str || !prefix)
         return false;
@@ -406,8 +398,8 @@ bool ends_with_ci(const char *str, const char *suffix) {
     if (!str || !suffix)
         return false;
 
-    size_t len_str = strlen(str);
-    size_t len_suffix = strlen(suffix);
+    size_t len_str = ft_strlen(str);
+    size_t len_suffix = ft_strlen(suffix);
 
     if (len_suffix > len_str)
         return false;
@@ -431,7 +423,6 @@ char* find_format_block(const char *str, size_t *start, t_format_block *position
     if (next_percent == -1 || str[next_percent + 1] == '\0')
         return NULL;
 
-    // chercher un vrai caractère de conversion après le %
     ssize_t end = find_first_of(str, "cspdiuxX%", next_percent + 1);
     if (end == -1)
         return NULL;
@@ -445,13 +436,13 @@ char* find_format_block(const char *str, size_t *start, t_format_block *position
     position->end = end;
     position->is_format = true;
     position->length = end - next_percent + 1;
-    *start = end + 1; // mise à jour de start pour la suite
+    *start = end + 1;
 
     return format_block;
 }
 
 
-// foire, non c' est les test qui foirait...
+
 char* find_text_block(const char *str, size_t *start, t_format_block *position) {
     if (!str || !start || str[*start] == '\0')
         return NULL;
@@ -460,7 +451,7 @@ char* find_text_block(const char *str, size_t *start, t_format_block *position) 
     size_t len;
 
     if (next_percent == -1) {
-        len = strlen(str + *start); //ok
+        len = ft_strlen(str + *start); //ok
     } else {
         len = next_percent - *start;
     }
@@ -480,5 +471,3 @@ char* find_text_block(const char *str, size_t *start, t_format_block *position) 
 
     return text_block;
 }
-
-

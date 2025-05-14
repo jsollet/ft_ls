@@ -56,10 +56,10 @@ void	build_zeros_leading(t_buffer *buf, t_conversion *conv, t_format_number *for
 void	compute_padding_space(t_conversion *conv, t_format_number *format);
 void	emit_padding_space(t_format_number *format, t_buffer *buf);
 void	emit_sign(intmax_t value, t_conversion *conv, t_format_number *format, t_buffer *buf);
-void 	emit_sign_u(uintmax_t value, t_conversion *conv, t_format_number *format, t_buffer *buf);
+void 	emit_sign_u(t_conversion *conv, t_format_number *format, t_buffer *buf);
 void	emit_padding_after(t_conversion *conv, t_format_number *format, t_buffer *buf);
 void	compute_sign(intmax_t value, t_conversion *conv, t_format_number *format);
-void    compute_sign_u(uintmax_t value, t_conversion *conv, t_format_number *format);
+void    compute_sign_u(t_conversion *conv, t_format_number *format);
 
 void	emit_integer(intmax_t value, t_conversion *conv, t_buffer *buf);
 void	emit_unsigned_integer(uintmax_t value, t_conversion *conv, t_buffer *buf);
