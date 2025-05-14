@@ -1,9 +1,38 @@
-#include <stddef.h>
-#include <stdint.h>
+
 #include "../includes/utils.h"
 
 
+char	*ft_strjoin_multiple(const char *first, ...){
+	if (!first)
+		return NULL;
+	size_t total_length = 0;
+	const char *current_str = first;
+	va_list args;
+	va_start(args, first);
+	while (current_str) {
+		total_length += ft_strlen(current_str);
+		current_str = va_arg(args, const char *);
+	}
+	va_end(args);
 
+	char *result = malloc(total_length + 1);
+	if (!result)
+		return NULL;
+	
+	va_start(args, first);
+	char *current_pos = result;
+	current_str = first;
+	while (current_str) {
+		size_t len = ft_strlen(current_str);
+		ft_memcpy(current_pos, current_str, len);
+		current_pos += len;
+		current_str = va_arg(args, const char *);
+	}
+	va_end(args);
+	
+	*current_pos = '\0';
+	return result;
+}
 
 
 void	*ft_memcpy_fast(void *dest, const void *source, size_t n)

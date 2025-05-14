@@ -139,7 +139,7 @@ char	has_acl(const char *path, char **text, t_exit_status *exit_status)
 }
 #endif
 
-char	*ft_strjoin_multiple(const char *first, ...){
+/* char	*ft_strjoin_multiple(const char *first, ...){
 	if (!first)
 		return NULL;
 	size_t total_length = 0;
@@ -169,7 +169,7 @@ char	*ft_strjoin_multiple(const char *first, ...){
 	
 	*current_pos = '\0';
 	return result;
-}
+} */
 
 char *check_and_free(char **tokens, char *line) {
 	if (!line) {
