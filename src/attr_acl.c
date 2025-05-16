@@ -20,7 +20,7 @@ ssize_t	get_xattr_size(t_fileData *file, char *buffer, ssize_t size){
 	return size;
 }
 
-void	fill_xattr_structure(t_fileData *file, char *buffer, ssize_t size){
+void	fill_xattr_structure_1(t_fileData *file, char *buffer, ssize_t size){
 	int	j = 0;
 	int	i = 0;
 	
@@ -38,6 +38,58 @@ void	fill_xattr_structure(t_fileData *file, char *buffer, ssize_t size){
 	}
 	
 }
+
+void fill_xattr_structure(t_fileData *file, char *buffer, ssize_t size) {
+    int j = 0;
+    int i = 0;
+
+    while (i < size) {
+        char *name = &buffer[i];
+        ssize_t value_size;
+
+        // Duplique le nom de l'attribut
+        file->xattrs[j].name = ft_strdup(name);
+        if (!file->xattrs[j].name) {
+            // Gestion d'erreur à prévoir
+            break;
+        }
+
+        // Récupère la taille de la valeur de l'attribut
+        #ifdef __APPLE__
+            value_size = getxattr(file->absolutePath, name, NULL, 0, 0, XATTR_NOFOLLOW);
+        #else
+            value_size = getxattr(file->absolutePath, name, NULL, 0);
+        #endif
+
+        if (value_size < 0) {
+            // En cas d'erreur, taille à 0, valeur NULL
+            file->xattrs[j].size = 0;
+            file->xattrs[j].value = NULL;
+        } else {
+            file->xattrs[j].size = value_size;
+            // Alloue la mémoire pour la valeur
+            file->xattrs[j].value = malloc(value_size);
+            if (file->xattrs[j].value) {
+                // Récupère la valeur de l'attribut
+                #ifdef __APPLE__
+                    getxattr(file->absolutePath, name, file->xattrs[j].value, value_size, 0, XATTR_NOFOLLOW);
+                #else
+                    getxattr(file->absolutePath, name, file->xattrs[j].value, value_size);
+                #endif
+            }
+            else {
+                // Si malloc échoue, taille 0 et valeur NULL
+                file->xattrs[j].size = 0;
+                file->xattrs[j].value = NULL;
+            }
+        }
+
+        i += ft_strlen(name) + 1;
+        j++;
+    }
+}
+
+
 
 void 	get_xattr(t_fileData *file,  t_exit_status *exit_status){
 	ssize_t	size = get_xattr_size(file, NULL, 0);
@@ -113,7 +165,7 @@ char has_xattr(const char *path, t_exit_status *exit_status)
     #endif
 }
 
-#ifdef __APPLE__
+//#ifdef __APPLE__
 char	has_acl(const char *path, char **text, t_exit_status *exit_status)
 {
 	acl_t acl = NULL;
@@ -137,39 +189,9 @@ char	has_acl(const char *path, char **text, t_exit_status *exit_status)
 		}
 		return ' ';
 }
-#endif
+//#endif
 
-/* char	*ft_strjoin_multiple(const char *first, ...){
-	if (!first)
-		return NULL;
-	size_t total_length = 0;
-	const char *current_str = first;
-	va_list args;
-	va_start(args, first);
-	while (current_str) {
-		total_length += ft_strlen(current_str);
-		current_str = va_arg(args, const char *);
-	}
-	va_end(args);
 
-	char *result = malloc(total_length + 1);
-	if (!result)
-		return NULL;
-	
-	va_start(args, first);
-	char *current_pos = result;
-	current_str = first;
-	while (current_str) {
-		size_t len = ft_strlen(current_str);
-		ft_memcpy(current_pos, current_str, len);
-		current_pos += len;
-		current_str = va_arg(args, const char *);
-	}
-	va_end(args);
-	
-	*current_pos = '\0';
-	return result;
-} */
 
 char *check_and_free(char **tokens, char *line) {
 	if (!line) {
@@ -222,5 +244,36 @@ char *format_acl_text(const char *acl_text) {
 	for (int i = 0; lines[i]; i++)
 		free(lines[i]);
 	free(lines);
+	return result;
+}
+
+char *format_acl_text_linux(const char *acl_text) {
+	if (!acl_text)
+		return NULL;
+
+	char **lines = ft_split(acl_text, '\n');
+	if (!lines)
+		return NULL;
+
+	char *result = ft_strdup("");
+	if (!result) {
+		free(lines);
+		return NULL;
+	}
+
+	for (int i = 0; lines[i]; i++) {
+		if (ft_strlen(lines[i]) == 0)
+			continue;
+		char *line = ft_strjoin(lines[i], "\n");
+		char *tmp = result;
+		result = ft_strjoin(result, line);
+		free(tmp);
+		free(line);
+	}
+
+	for (int i = 0; lines[i]; i++)
+		free(lines[i]);
+	free(lines);
+
 	return result;
 }

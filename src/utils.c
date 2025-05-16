@@ -135,3 +135,33 @@ void clean_path(char *path) {
 	}
 	*dst = '\0';
 }
+
+int	is_printable(const char *buf, ssize_t size)
+{
+	for (ssize_t i = 0; i < size; i++) {
+		if (!ft_isprint((unsigned char)buf[i]) &&
+			buf[i] != '\n' && buf[i] != '\t')
+			return (0);
+	}
+	return (1);
+}
+
+void	print_xattr_value(const char *buf, ssize_t size)
+{
+	if (is_printable(buf, size)) {
+		// Affichage direct
+		ssize_t _unused = write(1, buf, size);
+		_unused = write(1, "\n", 1);
+		(void)_unused;
+
+	} else {
+		// Affichage hexadécimal
+		for (ssize_t i = 0; i < size; i++) {
+			ft_printf1("%02x ", (unsigned char)buf[i]);
+			if ((i + 1) % 16 == 0)
+				ft_printf1("\n");
+		}
+		if (size % 16 != 0)
+			ft_printf1("\n");
+	}
+}

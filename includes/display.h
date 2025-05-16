@@ -10,6 +10,7 @@
 #include "./color.h"
 #include "./color_parser.h"
 #include "./column_view.h"
+#include "./utils.h"
 
 
 

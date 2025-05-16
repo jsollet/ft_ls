@@ -76,6 +76,7 @@ typedef struct s_xttr
 {
 	char *name;
 	ssize_t size;
+	char *value; //ajout 
 } t_attr;
 
 typedef struct s_special_bit {

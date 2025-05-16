@@ -1,6 +1,5 @@
-
-
 #include "../includes/getter.h"
+
 t_special_bit specials[] = {
 	{S_ISUID, S_IXUSR, 's', 'S', 3},
 	{S_ISGID, S_IXGRP, 's', 'S', 6},
@@ -165,28 +164,38 @@ void fill_permissions(t_fileData *file, struct stat *sfile){
 }
 
 void fill_extended_attrs(t_fileData *file, t_flags *flag, t_exit_status *exit_status){
+	if (strcmp(file->fileName, ".") == 0 || strcmp(file->fileName, "..") == 0) {
+		// ne pas traiter les xattr/acl pour ces fichiers
+		return;
+	}
 	file->acl_text = NULL;
 	file->has_xattr = ' ';
 	file->has_acl = ' ';
 
 	if (flag->attr || flag->extended ||  flag->at) {
 		file->has_xattr= has_xattr(file->absolutePath, exit_status);
+		//ft_printf("file->has_attr |%c|\n", file->has_xattr);
 		if (file->has_xattr == '@') {
 			get_xattr(file, exit_status);
 		}
 	}
-	#ifdef __APPLE__
+
 	char *tmp = NULL;
 	if (flag->acl || flag->extended || flag->e) {
 		file->has_acl = has_acl(file->absolutePath, &tmp, exit_status);
+		//ft_printf("file->has_acl |%c|-tmp=|%s|\n", file->has_acl, tmp);
 		if (file->has_acl == '?') {file->has_acl = ' ';}//
 		if (file->has_acl == '+')
 		{
-			file->acl_text = format_acl_text(tmp);
+			#ifdef __APPLE__
+				file->acl_text = format_acl_text(tmp);
+			#else
+				file->acl_text = format_acl_text_linux(tmp);
+			#endif
 		}
-		free(tmp);
+		
+		acl_free(tmp);
 	}
-	#endif
 }
 
 void fill_last_modified(t_fileData *file, const struct stat *sfile, char flag_label, time_t now) {

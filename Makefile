@@ -20,7 +20,24 @@ NAME = ft_ls
 RM = rm -f
 MKDIR = mkdir -p
 CC = gcc
+
 CFLAGS = -g  -Wall -Wextra -Werror -I$(INCDIR) -O3 #-fsanitize=address #-fprofile-instr-generate -fcoverage-mapping
+
+#selection OS
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+    LOCAL_INC = local/install/include
+	LOCAL_LIB = local/install/lib
+    CFLAGS += -I$(LOCAL_INC) -I$(LOCAL_INC)/sys
+	LDFLAGS += -L$(LOCAL_LIB) -lacl
+	
+    $(info [Makefile] Building on Linux with local ACL/ATTR headers)
+else ifeq ($(UNAME_S),Darwin)
+	LDFLAGS =
+    $(info [Makefile] Building on macOS using system headers)
+endif
+
+
 
 all: $(LIBFT) $(NAME)
 
@@ -30,7 +47,7 @@ $(LIBFT):
 
 # Création de l'exécutable
 $(NAME): $(OBJS) $(LIBFT)
-	$(CC) $(CFLAGS) $(OBJS) -L$(LIBFT_DIR) -lft -o $(NAME)
+	$(CC) $(CFLAGS) $(OBJS) -L$(LIBFT_DIR) -lft $(LDFLAGS) -o $(NAME)
 
 # Compilation des fichiers sources généraux
 $(OBJDIR)/%.o: $(SRCDIR)/%.c $(HEADER) | $(OBJDIR)
