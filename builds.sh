@@ -2,8 +2,8 @@
 
 set -e  # Stopper si une commande échoue
 
-INSTALL_DIR="$PWD/local_t/install"
-SRC_DIR="$PWD/local_t"
+INSTALL_DIR="$PWD/local/install"
+SRC_DIR="$PWD/local"
 ATTR_VERSION="2.5.1"
 ACL_VERSION="2.3.1"
 

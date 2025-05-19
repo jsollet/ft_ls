@@ -85,7 +85,8 @@ int ft_vprintf(const char *fmt, va_list args) {
             free(res);
         } 
     }
-    write(STDOUT_FILENO, buf.data, buf.length);
+	ssize_t _unused = write(STDOUT_FILENO, buf.data, buf.length);
+	(void)_unused;
     if (buf.is_dynamic){
         free(buf.data);
     }
