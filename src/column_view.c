@@ -4,7 +4,7 @@
 #include "../libft/includes/libftprintf.h"
 #include "../includes/ft_printf1.h"
 
-// les parametres a voir sous linux t->col_width surtout ;
+
 
 void    init_terminal(t_term *t){
 	ioctl(STDOUT_FILENO, TIOCGWINSZ, &t->w);
@@ -21,7 +21,7 @@ void    update_terminal(t_term *t, char **files, size_t file_count) {
 		if (len > t->max_len)
 			t->max_len = len;
 	}
-	t->col_width = t->max_len + 5;  // Ajout d'un espace pour la lisibilité ici avant 2, maintenant ok 
+	t->col_width = t->max_len + 5;
 }
 
 void    print_files_in_columns(char **files, t_term *t, char **color) {

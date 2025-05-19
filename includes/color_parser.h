@@ -4,6 +4,7 @@
 #include "./types.h"
 #include "../libft/includes/libft.h"
 #include "../libft/includes/libftprintf.h"
+
 typedef struct s_color_rule {
 	char    type;
 	bool    (*condition)(t_fileData *);
@@ -18,7 +19,5 @@ bool    is_socket(t_fileData *file);
 bool    is_fifo(t_fileData *file);
 bool    is_block_device(t_fileData *file);
 bool    is_char_device(t_fileData *file);
-
-
 char	*select_color_new(t_fileData *file, t_color_rule *color_rules);
 #endif

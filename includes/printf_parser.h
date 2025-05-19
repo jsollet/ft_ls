@@ -20,7 +20,6 @@ typedef enum e_printf_flags{
 } t_printf_flags;
 
 typedef enum e_printf_specifier{
-    // "cspdiuxX%" + f (a voir)
     c, s,p,d,i,u,x,X,f, e, E, g, G, percent, o
 } t_printf_specifier;
 
@@ -37,18 +36,18 @@ typedef enum e_printf_length{
 } t_printf_length;
 
 typedef struct s_width_precision {
-    int value;  // Valeur entière
-    char is_star;  // Indicateur pour '*' (astérisque)
+    int value;
+    char is_star;
 } t_width_precision;
 
 
 
 typedef struct s_conversion {
-    t_printf_specifier  specifier;   // Le type de spécificateur (%d, %s, etc.)
+    t_printf_specifier  specifier;
 
     int                 combined_flags;
     t_printf_length     length_mod;
-    t_width_precision   width;     // La largeur, soit un entier soit '*'
+    t_width_precision   width;
     t_width_precision   precision;
     bool                has_precision; 
 } t_conversion;

@@ -34,7 +34,7 @@ void    list_directory(t_flags *flags, t_stack **directories_to_process, t_stack
 		display_sorted_files(true,&files, flags, false, &dyn_format);
 		reset_dyn(&files);
 	}	
-	if (flags->d){ // a voir
+	if (flags->d){
 		if (fileList)
 			process_argument_files(&files, NULL, fileList, flags, exit_status, now, &dyn_format);
 		if (directories_to_process)
@@ -166,10 +166,9 @@ bool    list_directory_helper(const char *path, t_dyn *files, t_flags *flags, t_
 
 		
 	}
-
-	if (errno != 0) { // a voir
-		fprintf(stderr, "ft_ls: %s  ", path); //ft_ls:
-		//(strerror(errno));
+	//
+	if (errno != 0) {
+		fprintf(stderr, "ft_ls: %s  ", path);
 		perror("");
 	}
 

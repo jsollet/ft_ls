@@ -165,7 +165,6 @@ void fill_permissions(t_fileData *file, struct stat *sfile){
 
 void fill_extended_attrs(t_fileData *file, t_flags *flag, t_exit_status *exit_status){
 	if (strcmp(file->fileName, ".") == 0 || strcmp(file->fileName, "..") == 0) {
-		// ne pas traiter les xattr/acl pour ces fichiers
 		return;
 	}
 	file->acl_text = NULL;
@@ -174,7 +173,6 @@ void fill_extended_attrs(t_fileData *file, t_flags *flag, t_exit_status *exit_st
 
 	if (flag->attr || flag->extended ||  flag->at) {
 		file->has_xattr= has_xattr(file->absolutePath, exit_status);
-		//ft_printf("file->has_attr |%c|\n", file->has_xattr);
 		if (file->has_xattr == '@') {
 			get_xattr(file, exit_status);
 		}
@@ -183,7 +181,7 @@ void fill_extended_attrs(t_fileData *file, t_flags *flag, t_exit_status *exit_st
 	char *tmp = NULL;
 	if (flag->acl || flag->extended || flag->e) {
 		file->has_acl = has_acl(file->absolutePath, &tmp, exit_status);
-		//ft_printf("file->has_acl |%c|-tmp=|%s|\n", file->has_acl, tmp);
+
 		if (file->has_acl == '?') {file->has_acl = ' ';}//
 		if (file->has_acl == '+')
 		{
@@ -209,7 +207,7 @@ void fill_last_modified(t_fileData *file, const struct stat *sfile, char flag_la
 
 	char timeBuf[26];
 	ft_memcpy(timeBuf, timeStr, 25);
-	timeBuf[24] = '\0'; // remplace \n
+	timeBuf[24] = '\0';
 
 	if (now - timeStamp > SIX_MONTHS_IN_SECONDS) {
 		ft_strlcpy(file->lastModified, timeBuf + 4, 8);

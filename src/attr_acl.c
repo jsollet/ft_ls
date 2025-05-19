@@ -47,14 +47,12 @@ void fill_xattr_structure(t_fileData *file, char *buffer, ssize_t size) {
         char *name = &buffer[i];
         ssize_t value_size;
 
-        // Duplique le nom de l'attribut
         file->xattrs[j].name = ft_strdup(name);
         if (!file->xattrs[j].name) {
-            // Gestion d'erreur à prévoir
             break;
         }
 
-        // Récupère la taille de la valeur de l'attribut
+
         #ifdef __APPLE__
             value_size = getxattr(file->absolutePath, name, NULL, 0, 0, XATTR_NOFOLLOW);
         #else
@@ -62,15 +60,14 @@ void fill_xattr_structure(t_fileData *file, char *buffer, ssize_t size) {
         #endif
 
         if (value_size < 0) {
-            // En cas d'erreur, taille à 0, valeur NULL
+
             file->xattrs[j].size = 0;
             file->xattrs[j].value = NULL;
         } else {
             file->xattrs[j].size = value_size;
-            // Alloue la mémoire pour la valeur
+
             file->xattrs[j].value = malloc(value_size);
             if (file->xattrs[j].value) {
-                // Récupère la valeur de l'attribut
                 #ifdef __APPLE__
                     getxattr(file->absolutePath, name, file->xattrs[j].value, value_size, 0, XATTR_NOFOLLOW);
                 #else
@@ -78,7 +75,6 @@ void fill_xattr_structure(t_fileData *file, char *buffer, ssize_t size) {
                 #endif
             }
             else {
-                // Si malloc échoue, taille 0 et valeur NULL
                 file->xattrs[j].size = 0;
                 file->xattrs[j].value = NULL;
             }
@@ -165,7 +161,7 @@ char has_xattr(const char *path, t_exit_status *exit_status)
     #endif
 }
 
-//#ifdef __APPLE__
+
 char	has_acl(const char *path, char **text, t_exit_status *exit_status)
 {
 	acl_t acl = NULL;
@@ -189,7 +185,7 @@ char	has_acl(const char *path, char **text, t_exit_status *exit_status)
 		}
 		return ' ';
 }
-//#endif
+
 
 
 

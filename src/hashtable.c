@@ -4,29 +4,6 @@
 
 static size_t inode_set_hits = 0;
 static size_t inode_set_misses = 0;
-/* void inode_set_init(t_inodeSet *set) {
-	set->count = 0;
-	memset(set->table, 0, sizeof(set->table));
-}
-
-bool inode_set_contains(t_inodeSet *set, ino_t ino) {
-	int idx = ino % INODE_HASH_SIZE;
-	// collision naive, pas grave ici pour une première version
-	while (set->table[idx] != 0) {
-		if (set->table[idx] == ino)
-			return true;
-		idx = (idx + 1) % INODE_HASH_SIZE;
-	}
-	return false;
-}
-
-void inode_set_add(t_inodeSet *set, ino_t ino) {
-	int idx = ino % INODE_HASH_SIZE;
-	while (set->table[idx] != 0)
-		idx = (idx + 1) % INODE_HASH_SIZE;
-	set->table[idx] = ino;
-	set->count++;
-} */
 
 static unsigned long hash_inode(ino_t ino) {
 	return ino % INODE_HASH_SIZE;
@@ -75,5 +52,3 @@ void inode_set_free(t_inodeSet *set) {
 		set->table[i] = NULL;
 	}
 }
-
-

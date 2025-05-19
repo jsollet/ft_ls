@@ -1,18 +1,15 @@
 #ifndef STRING_UTILS_H
 # define  STRING_UTILS_H
 #include "./allheaders.h"
-#include <errno.h>
 #include "../libft/includes/libft.h"
 
 typedef struct s_format_block {
-    size_t start;  // position de début (inclus)
-    size_t end;    // position de fin (exclus)
+    size_t start;
+    size_t end;
     size_t length;
-    bool   is_format; // 1 si %...specifier, 0 si texte normal
+    bool   is_format;
 } t_format_block;
 
-
-//#include "./buffer.h"
 
 #define CHAR_RANGE 256
 int ft_strcmp(const char *s1, const char *s2);
@@ -44,7 +41,7 @@ char *ft_strtok_custom(const char *s, const char *delims, size_t *start);
 
 char*   find_format_block(const char *str,  size_t *start, t_format_block *position);
 char*   find_text_block(const char *str, size_t *start, t_format_block *position);
-// not done yet
+
 
 
 

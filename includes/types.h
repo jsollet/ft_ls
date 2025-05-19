@@ -12,7 +12,7 @@
 #define SIX_MONTHS_IN_SECONDS 15552000
 #define MAX_PATH_LEN 1024
 #define FILE_NAME_MAX     NAME_MAX 
-#define OWNER_NAME_MAX    64            // largement suffisant
+#define OWNER_NAME_MAX    64
 #define GROUP_NAME_MAX    64
 /*
 #ifdef PATH_MAX
@@ -34,12 +34,11 @@
 
 #define FLAG_INACCESSIBLE "%-10s%c.%3s.%4s %-3s %-5s %-10s %-10s\n"
 
-// le 4 car la largeur est de 10 et la taille de root (si max) sera de 4 donc il faudra voir 
-//#define FLAG_L_DYNAMIC        "%-10s%c %3ld %-*s %-*s %*lld %-10s %-10s"
 
-#define FLAG_INACCESSIBLE_DYN   "%-10s%c %3s %-*s %-*s %*s %-10s %-10s\n" // petit decalage avec le nom du fichier mais pas clair
-#define FLAG_INACCESSIBLE_DYN_G "%-10s%c %3s %-*s %*s %-10s %-10s\n" // petit decalage avec le nom du fichier mais pas clair
-// Structure de la pile pour les répertoires à explorer
+
+#define FLAG_INACCESSIBLE_DYN   "%-10s%c %3s %-*s %-*s %*s %-10s %-10s\n"
+#define FLAG_INACCESSIBLE_DYN_G "%-10s%c %3s %-*s %*s %-10s %-10s\n"
+
 typedef struct s_stack
 {
 	size_t count;
@@ -55,17 +54,17 @@ typedef struct s_flags
 	bool    l;
 	bool    t;
 
-	// bonus a voir...
-	bool    e; // pour les acl
-	bool    at; // @ pour attibut etendu
+
+	bool    e;
+	bool    at; 
 	bool    u;
-	bool    U; // pour f
+	bool    U;
 	bool    f;
 	bool    g;
 	bool    d;
-	bool    one; // -1
+	bool    one;
 	bool    color;
-	// bonus optimisation attr
+
 	bool	acl;
 	bool	attr;
 	bool	extended;
@@ -76,7 +75,7 @@ typedef struct s_xttr
 {
 	char *name;
 	ssize_t size;
-	char *value; //ajout 
+	char *value;
 } t_attr;
 
 typedef struct s_special_bit {
@@ -92,7 +91,7 @@ typedef struct s_dynamic_format {
 	size_t		max_owner_width;
 	size_t		max_group_width;
 	size_t		max_size_width;
-	//...
+
 }	t_dynamic_format;
 
 typedef struct s_fileData
@@ -100,15 +99,11 @@ typedef struct s_fileData
 	bool            valid;        
 	char*           fileName;
 	unsigned char			d_type;
-	//char            fileName[FILE_NAME_MAX + 1];
-	//char    		absolutePath[PATH_MAX + 1]; 
+	
 	char*           absolutePath;
-	//char*           path;
 	char            owner[OWNER_NAME_MAX + 1];
 	char            group[GROUP_NAME_MAX + 1];
-
 	char            link_target_buf[PATH_MAX];
-
 	char*           acl_text;
 
 	long long       fileSize;
@@ -118,8 +113,8 @@ typedef struct s_fileData
 	bool            argument;
 	
 	char            fileType;
-	char            permission[11]; // Permissions (ex: "-rw-r--r--")
-	char            lastModified[20]; // Date de modification (format "Feb 21 14:22")
+	char            permission[11];
+	char            lastModified[20];
 
 	t_attr          *xattrs;
 	int             xattr_count;

@@ -16,11 +16,9 @@ int ft_printf1(const char *fmt, ...) {
 
 int ft_vprintf(const char *fmt, va_list args) {
 	t_buffer buf;
-    //char tmp[16000000]; // a la taille 
-	char *res;
-    //buf_init_fixed(&buf, tmp, sizeof(tmp), BUF_TEXT);
-    buf_init_fd(&buf, STDOUT_FILENO,  BUF_TEXT);
 
+	char *res;
+    buf_init_fd(&buf, STDOUT_FILENO,  BUF_TEXT);
 	size_t pos = 0;
 	t_format_block block;
 	
@@ -71,14 +69,10 @@ int ft_vprintf(const char *fmt, va_list args) {
 				char *str = va_arg(args, char *);
 
                 t_buffer buf_temp;
-                
                 buf_init_dynamic(&buf_temp, BUF_TEXT);
                 emit_string(str, &conv, &buf_temp);
-                
                 buf_putstrn(&buf, buf_temp.data, buf_temp.length);
-                free(buf_temp.data);    // avec buf_init_dynamic
-				//buf_putstr(&buf, str);
-
+                free(buf_temp.data);
 			} else if (conv.specifier == 'c'){
                 char c = va_arg(args, int);
                 t_buffer buf_temp;
@@ -88,7 +82,6 @@ int ft_vprintf(const char *fmt, va_list args) {
                 buf_putstrn(&buf, buf_temp.data, buf_temp.length); 
                 }
 			
-            
             free(res);
         } 
     }

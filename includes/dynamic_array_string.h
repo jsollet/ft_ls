@@ -5,17 +5,16 @@
 
 typedef struct s_dyn
 {
-    //char **list;  // Tableau de chaînes de caractères
     t_fileData **list;
-    int     length;   // Nombre d'éléments actuels
-    int     capacity; // Capacité maximale actuelle
-    long    total_size; // La taille totale des fichiers
+    int     length;
+    int     capacity;
+    long    total_size;
 } t_dyn;
 
-void init_dyn(t_dyn *list);
-void resize_dyn(t_dyn *list);
-void append(t_dyn *list, t_fileData *item);
-void free_fileData(t_fileData *file);
-void free_dyn(t_dyn *list);
-void reset_dyn(t_dyn *dyn);
+void    init_dyn(t_dyn *list);
+void    resize_dyn(t_dyn *list);
+void    append(t_dyn *list, t_fileData *item);
+void    free_fileData(t_fileData *file);
+void    free_dyn(t_dyn *list);
+void    reset_dyn(t_dyn *dyn);
 #endif

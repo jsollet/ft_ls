@@ -56,7 +56,7 @@ void free_fileData(t_fileData *file)
 		for (int j = 0; j < file->xattr_count; j++) {
 			if (file->xattrs[j].name){
 				free(file->xattrs[j].name);
-				free(file->xattrs[j].value);// ajout linux
+				free(file->xattrs[j].value);
 			}
 		}
 		free(file->xattrs);

@@ -2,11 +2,6 @@
 #include "../includes/buffer.h"
 
 
-
-
-
-
-
 intmax_t get_int_arg(va_list args, t_printf_length length) {
     if (length == ll) return va_arg(args, long long); // a voir
     if (length == l) return va_arg(args, long);
@@ -70,26 +65,20 @@ bool is_valid_specifier(const char *format, size_t start) {
     else if (format[start + 1] == '\0') return false;
 	size_t i = start + 1;
 
-	// skip flags
+	i += skip_while(format + i, "-+ 0#", 0);
 
-	i += skip_while(format + i, "-+ 0#", 0);// j' enleve le 0
-
-	// skip width
 	while ((format[i] != '\0') && (ft_isdigit(format[i]) || format[i] == '*')) i++;
 
-	// skip precision
 	if (format[i] == '.') {
 		i++;
 		while ((format[i] != '\0') && (ft_isdigit(format[i]) || format[i] == '*')) i++;
 	}
 
-	// skip length modifiers
 	if (format[i] != '\0' &&(ft_strncmp(format + i, "hh", 2) == 0 || ft_strncmp(format + i, "ll", 2) == 0))
 		i += 2;
 	else if (format[i] != '\0' && ft_strchr(LENGTH_1, format[i]))
 		i++;
 
-	// check if next char is a valid conversion
 	if (format[i] != '\0' && ft_strchr(SPECIFIERS, format[i]))
 		return true;
 	return false;
@@ -97,9 +86,8 @@ bool is_valid_specifier(const char *format, size_t start) {
 
 
 
-
-bool is_valid_specifier_and_parse(const char *format, size_t start, t_conversion *conv) { // a tester
-	if (format[start] == '%' && format[start + 1] == '%') // ajout 
+bool is_valid_specifier_and_parse(const char *format, size_t start, t_conversion *conv) {
+	if (format[start] == '%' && format[start + 1] == '%')
     {
         conv->specifier = percent;
         return true;
@@ -111,7 +99,6 @@ bool is_valid_specifier_and_parse(const char *format, size_t start, t_conversion
 	size_t i = start + 1;
 
 	// skip flags
-	//i += skip_while(format + i, "-+ 0#", 0);  // a voir
     conv->combined_flags = get_flags(format, &i);
 
 	// skip width
@@ -132,7 +119,7 @@ bool is_valid_specifier_and_parse(const char *format, size_t start, t_conversion
     conv->precision.is_star = 0;
     conv->precision.value = 0; 
 	if ((format[i] != '\0') && format[i] == '.') {
-        conv->has_precision = true; // ajout
+        conv->has_precision = true;
 		i++;
         if ((format[i] != '\0') && format[i] == '*') {
             conv->precision.is_star = 1;
@@ -172,10 +159,11 @@ bool is_valid_specifier_and_parse(const char *format, size_t start, t_conversion
 
 	if (format[i] != '\0' && ft_strchr(SPECIFIERS, format[i])){
         conv->specifier = format[i];
-        return true;
+       
     } else if (format[i] == '%'){
         conv->specifier = percent;
-        return true;
+    } else {
+        return false;
     }
     // normalisation 
 
@@ -183,7 +171,7 @@ bool is_valid_specifier_and_parse(const char *format, size_t start, t_conversion
     {
         conv->combined_flags &= ~ZERO;
     }
-    // Annule le flag SPACE si PLUS est présent
+
     if ((conv->combined_flags & PLUS) && (conv->combined_flags & SPACE)) {
         conv->combined_flags &= ~SPACE;
     }
@@ -194,5 +182,5 @@ bool is_valid_specifier_and_parse(const char *format, size_t start, t_conversion
         conv->specifier == 'g' || conv->specifier == 'G')) {
         conv->combined_flags &= ~SHARP;
     }
-	return false;
+	return true;
 }

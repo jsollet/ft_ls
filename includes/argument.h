@@ -9,10 +9,8 @@
 #include "./types.h"
 #include "./error.h"
 
-bool file_exists(const char *path);
+bool	file_exists(const char *path);
 bool	is_directory(const char *path);
-
 int find_double_dash(int argc, char *argv[]);
-//void process_path(t_stack **dirs, t_stack **files, char *path, t_exit_status *exit_status);
 bool process_path(t_stack **dirs, t_stack **files, char *path, t_exit_status *exit_status);
 #endif
