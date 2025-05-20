@@ -6,7 +6,7 @@ rm -rf test_env regular_file setuid_file setgid_file sticky_file exec_setuid exe
 echo "Création de l'environnement de test..."
 
 # Création dossiers et fichiers basiques
-mkdir -p test_env/{dir1,dir2,dir3/subdir}
+mkdir -p test_env/{dir1,dir2,dir3/subdir,sticky}
 
 touch test_env/-weirdfile
 touch test_env/file1.txt
@@ -24,6 +24,9 @@ mkfifo test_env/dir3/fifo_test
 chmod 777 test_env/file1.txt
 chmod 644 test_env/dir2/file3.txt
 chmod 000 test_env/dir3/subdir
+chmod 777 test_env/sticky
+
+cd test_env/sticky
 
 # Fichiers spéciaux (hors test_env)
 touch regular_file
@@ -59,6 +62,7 @@ chmod +x full_special
 echo "✅ Environnement de test complet créé."
 
 echo
-echo "Liste des fichiers/dossiers avec détails :"
-ls -l test_env
-ls -l regular_file setuid_file setgid_file sticky_file exec_setuid exec_setgid exec_sticky sticky_dir full_special
+echo "Liste des fichiers/dossiers dans test_env : "
+ls -l ../..
+echo "Liste des fichiers/dossiers dans test_env/sticky :"
+ls -l 
