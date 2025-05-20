@@ -8,7 +8,6 @@
 #include "../includes/argument.h"
 #include "../includes/color.h"
 #include "../includes/color_parser.h"
-#include "../includes/hashtable.h"
 #include "../includes/column_view.h"
 #include "../includes/utils.h"
 #include "../includes/getter.h"

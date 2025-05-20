@@ -34,39 +34,6 @@ char	*ft_strjoin_multiple(const char *first, ...){
 	return result;
 }
 
-
-void	*ft_memcpy_fast(void *dest, const void *source, size_t n)
-{
-	if (!dest && !source)
-		return (NULL);
-
-	unsigned char			*dst = dest;
-	const unsigned char		*src = source;
-
-	if (((uintptr_t)dest % sizeof(size_t) == 0) &&
-		((uintptr_t)source % sizeof(size_t) == 0))
-	{
-		size_t *dst_word = (size_t *)dest;
-		const size_t *src_word = (const size_t *)source;
-
-		while (n >= sizeof(size_t))
-		{
-			*dst_word++ = *src_word++;
-			n -= sizeof(size_t);
-		}
-		dst = (unsigned char *)dst_word;
-		src = (const unsigned char *)src_word;
-	}
-
-	while (n--)
-		*dst++ = *src++;
-
-	return dest;
-}
-
-
-
-
 void *ft_memcpy_faster(void *dest, const void *src, size_t n)
 {
 	if (!dest && !src)
@@ -134,8 +101,7 @@ void clean_path(char *path) {
 int	is_printable(const char *buf, ssize_t size)
 {
 	for (ssize_t i = 0; i < size; i++) {
-		if (!ft_isprint((unsigned char)buf[i]) &&
-			buf[i] != '\n' && buf[i] != '\t')
+		if (!ft_isprint((unsigned char)buf[i]) && buf[i] != '\n' && buf[i] != '\t')
 			return (0);
 	}
 	return (1);

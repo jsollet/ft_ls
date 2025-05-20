@@ -15,7 +15,7 @@
 
 t_fileData		*malloc_fileData(void);
 char	*ft_strjoin_multiple(const char *first, ...);
-void	*ft_memcpy_fast(void *dest, const void *source, size_t n);
+
 void 	*ft_memcpy_faster(void *dest, const void *src, size_t n);
 void	clean_path(char *path);
 int		is_printable(const char *buf, ssize_t size);
