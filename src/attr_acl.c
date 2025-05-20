@@ -162,7 +162,7 @@ char has_xattr(const char *path, t_exit_status *exit_status)
 }
 
 
-char	has_acl(const char *path, char **text, t_exit_status *exit_status)
+char	has_acl_old(const char *path, char **text, t_exit_status *exit_status)
 {
 	acl_t acl = NULL;
 	#ifdef __APPLE__
@@ -186,6 +186,35 @@ char	has_acl(const char *path, char **text, t_exit_status *exit_status)
 		return ' ';
 }
 
+char has_acl(const char *path, char **text, t_exit_status *exit_status)
+{
+	acl_t acl = NULL;
+	#ifdef __APPLE__
+		acl = acl_get_file(path, ACL_TYPE_EXTENDED);
+		if (acl == NULL) {
+			set_exit_status(exit_status, 1, strerror(errno));
+			return ' ';
+		}
+		*text = acl_to_text(acl, NULL);
+		acl_free(acl);
+		return (*text != NULL) ? '+' : ' ';
+	#else
+		acl = acl_get_file(path, ACL_TYPE_ACCESS);
+		if (acl == NULL) {
+			set_exit_status(exit_status, 1, strerror(errno));
+			return ' ';
+		}
+		unsigned int equiv;
+		if (acl_equiv_mode(acl, &equiv) == 0 && equiv == 0) {
+			// vraie ACL étendue
+			*text = acl_to_text(acl, NULL);
+			acl_free(acl);
+			return (*text != NULL) ? '+' : ' ';
+		}
+		acl_free(acl);
+		return ' ';
+	#endif
+}
 
 
 

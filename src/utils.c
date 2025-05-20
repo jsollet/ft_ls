@@ -43,7 +43,6 @@ void	*ft_memcpy_fast(void *dest, const void *source, size_t n)
 	unsigned char			*dst = dest;
 	const unsigned char		*src = source;
 
-	// Optimisation par blocs de size_t
 	if (((uintptr_t)dest % sizeof(size_t) == 0) &&
 		((uintptr_t)source % sizeof(size_t) == 0))
 	{
@@ -59,7 +58,6 @@ void	*ft_memcpy_fast(void *dest, const void *source, size_t n)
 		src = (const unsigned char *)src_word;
 	}
 
-	// Finir octet par octet
 	while (n--)
 		*dst++ = *src++;
 
@@ -77,7 +75,6 @@ void *ft_memcpy_faster(void *dest, const void *src, size_t n)
 	unsigned char *d = dest;
 	const unsigned char *s = src;
 
-	// Si les pointeurs sont bien alignés
 	if (((uintptr_t)d % sizeof(size_t) == 0) && ((uintptr_t)s % sizeof(size_t) == 0)) {
 		size_t *dw = (size_t *)d;
 		const size_t *sw = (const size_t *)s;
@@ -98,8 +95,6 @@ void *ft_memcpy_faster(void *dest, const void *src, size_t n)
 		d = (unsigned char *)dw;
 		s = (const unsigned char *)sw;
 	}
-
-	// Reste octet par octet
 	while (n--)
 		*d++ = *s++;
 
@@ -113,7 +108,7 @@ t_fileData	*malloc_fileData(void)
 	if (!file)
 		return NULL;
 	ft_bzero(file, sizeof(t_fileData));
-	file->valid = true; // a voir avant false
+	file->valid = true;
 	return (file);
 }
 
@@ -149,17 +144,13 @@ int	is_printable(const char *buf, ssize_t size)
 void	print_xattr_value(const char *buf, ssize_t size)
 {
 	if (is_printable(buf, size)) {
-		// Affichage direct
-		ssize_t _unused = write(1, buf, size);
-		_unused = write(1, "\n", 1);
-		(void)_unused;
-
+		ft_printf1("%.*s\n", (int)size, buf);
 	} else {
-		// Affichage hexadécimal
+		ft_printf1("\n\t    ");
 		for (ssize_t i = 0; i < size; i++) {
-			ft_printf1("%02x ", (unsigned char)buf[i]);
+			ft_printf("%02x ", (unsigned char)buf[i]);
 			if ((i + 1) % 16 == 0)
-				ft_printf1("\n");
+				ft_printf1("\n\t    ");
 		}
 		if (size % 16 != 0)
 			ft_printf1("\n");

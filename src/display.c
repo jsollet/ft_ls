@@ -109,11 +109,8 @@ void display_sorted_files(bool an_error,t_dyn *files, t_flags *flags, bool is_di
 			}
 			if (flags->at && files->list[i]->has_xattr== '@'){
 				for (int j=0;j < files->list[i]->xattr_count; j++){
-					#ifdef __APPLE__
-					ft_printf1("\n\t%s\t%zd", files->list[i]->xattrs[j].name, files->list[i]->xattrs[j].size);
-					#else
+					ft_printf1("\n\t%s\t%zd\t", files->list[i]->xattrs[j].name, files->list[i]->xattrs[j].size);
 					print_xattr_value(files->list[i]->xattrs[j].value,files->list[i]->xattrs[j].size );
-					#endif
 				}
 			}
 			ft_printf1("\n");
