@@ -46,4 +46,6 @@ export LDFLAGS="-L$INSTALL_DIR/lib"
 make
 make install
 
+export PATH="$INSTALL_DIR/bin:$PATH"
+
 echo "✅ Installation terminée dans $INSTALL_DIR"
