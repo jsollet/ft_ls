@@ -27,13 +27,17 @@ int	compare_by_fileName(t_fileData *a, t_fileData *b) {
 	return ft_strcmp(a->fileName, b->fileName);
 }
 
-int	compare_by_time(t_fileData *a, t_fileData *b) {
-	if (a->st_mtimes == b->st_mtimes){
-		return (a->st_ino - b->st_ino);
-	}
-	if (a->st_mtimes < b->st_mtimes) return 1;
-	else if (a->st_mtimes > b->st_mtimes) return -1;
-	else return 0;
+
+int compare_by_time(t_fileData *a, t_fileData *b) {
+	if (a->st_mtimes > b->st_mtimes)
+		return -1;
+	else if (a->st_mtimes < b->st_mtimes)
+		return 1;
+	if (a->st_mtime_nsec > b->st_mtime_nsec)
+		return -1;
+	else if (a->st_mtime_nsec < b->st_mtime_nsec)
+		return 1;
+	return ft_strcmp(a->fileName, b->fileName);
 }
 
 
@@ -41,15 +45,18 @@ int compare_by_fileName_reverse(t_fileData *a, t_fileData *b) {
 	return ft_strcmp(b->fileName, a->fileName);
 }
 
-int compare_by_time_reverse(t_fileData *a, t_fileData *b) {
-	if (a->st_mtimes == b->st_mtimes){
-		return (a->st_ino - b->st_ino);
-	}
-	if (a->st_mtimes < b->st_mtimes) return -1;
-	else if (a->st_mtimes > b->st_mtimes) return 1;
-	else return 0;
-}
 
+int compare_by_time_reverse(t_fileData *a, t_fileData *b) {
+	if (a->st_mtimes < b->st_mtimes)
+		return -1;
+	else if (a->st_mtimes > b->st_mtimes)
+		return 1;
+	if (a->st_mtime_nsec < b->st_mtime_nsec)
+		return -1;
+	else if (a->st_mtime_nsec > b->st_mtime_nsec)
+		return 1;
+	return ft_strcmp(a->fileName, b->fileName);
+}
 
 static void insertion_sort(t_fileData *arr[], int left, int right, int (*cmp)(t_fileData *, t_fileData *)) {
 	for (int i = left + 1; i <= right; i++) {

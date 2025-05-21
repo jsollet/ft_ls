@@ -9,22 +9,12 @@
 # include <limits.h>
 # include "./color.h"
 
-#define SIX_MONTHS_IN_SECONDS 15552000
-#define MAX_PATH_LEN 1024
-#define FILE_NAME_MAX     NAME_MAX 
-#define OWNER_NAME_MAX    64
-#define GROUP_NAME_MAX    64
-/*
-#ifdef PATH_MAX
-    char buffer[PATH_MAX];
-#else
-    char buffer[4096]; // ou une valeur raisonnable
-#endif
-*/
-#define FLAG_LCOLOR "%-10s%c %3ld %-10s %-3s %5lld %-10s %s%-10s%s"
-#define FLAG_L "%-10s%c %3ld %-10s %-3s %5lld %-10s %-10s"
-#define FLAG_LGCOLOR "%-10s%c %3ld %-10s %5lld %-10s %s%-10s%s"
-#define FLAG_LG "%-10s%c %3ld %-10s %5lld %-10s %-10s"
+#define SIX_MONTHS_IN_SECONDS	15552000
+#define MAX_PATH_LEN			1024
+#define FILE_NAME_MAX     		NAME_MAX 
+#define OWNER_NAME_MAX    		64
+#define GROUP_NAME_MAX    		64
+
 
 #define FLAG_L_DYNAMIC  "%-10s%c %3ld %-*s %-*s %*lld %-10s %-10s"
 #define FLAG_LCOLOR_DYNAMIC "%-10s%c %3ld %-*s %-*s %*lld %-10s %s%-10s%s"
@@ -98,13 +88,13 @@ typedef struct s_fileData
 {
 	bool            valid;        
 	char*           fileName;
-	unsigned char			d_type;
+	unsigned char	d_type;
 	
 	char*           absolutePath;
 	char            owner[OWNER_NAME_MAX + 1];
 	char            group[GROUP_NAME_MAX + 1];
 	char            link_target_buf[PATH_MAX];
-	char*           acl_text;
+	
 
 	long long       fileSize;
 	long            linkNumber;
@@ -117,16 +107,16 @@ typedef struct s_fileData
 	char            lastModified[20];
 
 	t_attr          *xattrs;
+	char*           acl_text;
 	int             xattr_count;
 	bool            print_xattrs;
-
 	char            has_acl;
 	char            has_xattr;
 
+	unsigned long	st_mtime_nsec;
 	time_t          st_mtimes;
 	time_t          st_atimes;
 	ino_t           st_ino;
-
 }   t_fileData;
 
 typedef struct s_term

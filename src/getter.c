@@ -105,6 +105,11 @@ void	fill_basic_info(t_fileData *file, struct stat *sfile, long *total_size){
 	file->blocSize = sfile->st_blocks;
 	file->st_mtimes = sfile->st_mtime;
 	file->st_atimes = sfile->st_atime;
+	#ifdef __APPLE__
+		file->st_mtime_nsec = sfile->st_mtimespec.tv_nsec;
+	#else
+		file->st_mtime_nsec = sfile->st_mtim.tv_nsec;
+	#endif
 	file->st_ino = sfile->st_ino;
 
 	file->xattrs = NULL;
@@ -241,13 +246,13 @@ void    get_fileInfo(const char* path, t_fileData *file,  t_flags *flag,long *to
 
 	fill_basic_info(file, &sfile, total_size);
 	fill_user_group_info(file, &sfile, exit_status);
-
 	fill_permissions(file, &sfile);
 	if (flag->acl || flag->attr || flag->extended || flag->e || flag->at){
 		fill_extended_attrs(file, flag, exit_status);
 	}
 	fill_last_modified(file, &sfile, flag_label, now);
 	fill_symlink_target(path, file, exit_status);
+	
 	if ((result = ft_strlen(file->fileName)) > dyn_format->max_name_width) {
 		dyn_format->max_name_width = result;
 	}

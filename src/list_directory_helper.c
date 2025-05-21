@@ -29,7 +29,7 @@ void    list_directory(t_flags *flags, t_stack **directories_to_process, t_stack
 		first_dir = true;
 	}
 
-	if (fileList != NULL && *fileList != NULL) {
+	if (fileList != NULL && *fileList != NULL) { // pas ici
 		process_argument_files(&files, directories_to_process, fileList, flags, exit_status, now, &dyn_format);
 		display_sorted_files(true,&files, flags, false, &dyn_format);
 		reset_dyn(&files);
@@ -183,7 +183,6 @@ bool    list_directory_helper(const char *path, t_dyn *files, t_flags *flags, t_
 		clean_path(subdirs.list[i]->absolutePath);
 		push(directories_to_process,  subdirs.list[i]->absolutePath);
 	}
-
 	free_dyn(&subdirs);
 	return false;
 }
@@ -210,15 +209,14 @@ bool	handle_subdir(t_dyn *subdirs, t_fileData *file) {
 	t_fileData *subdir = malloc_fileData();
 	if (!subdir) return false;
 
-
 	subdir->fileName = ft_strdup(file->absolutePath);
 	subdir->absolutePath = ft_strdup(file->absolutePath);
 	subdir->owner[0] = '\0';
 	subdir->group[0] = '\0';
-
 	subdir->link_target_buf[0] = '\0';
 	subdir->st_mtimes = file->st_mtimes;
-	subdir->st_mtimes = file->st_atimes;
+	subdir->st_atimes = file->st_atimes;
+	subdir->st_mtime_nsec = file->st_mtime_nsec;
 	subdir->st_ino = file->st_ino;
 	append(subdirs, subdir);
 	return true;
