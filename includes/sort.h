@@ -5,9 +5,6 @@
 #include "types.h"
 #include "../libft/includes/libftprintf_fd.h"
 
-time_t  get_mtime(t_fileData *f);
-time_t  get_atime(t_fileData *f);
-
 int     compare_by_fileName(t_fileData *a, t_fileData *b);
 int     compare_by_time(t_fileData *a, t_fileData *b);
 int     compare_by_fileName_reverse(t_fileData *a, t_fileData *b);

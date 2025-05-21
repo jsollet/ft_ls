@@ -5,9 +5,8 @@
 #include "types.h"
 #include "../libft/includes/libft.h"
 
-void push(t_stack **stack, const char *path);
-char *pop(t_stack **stack);
-void print_stack(t_stack *stack);
-void reverse_stack(t_stack **stack);
-
+void	push(t_stack **stack, const char *path);
+char	*pop(t_stack **stack);
+void	print_stack(t_stack *stack);
+void 	reverse_stack(t_stack **stack);
 #endif

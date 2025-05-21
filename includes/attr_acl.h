@@ -13,8 +13,8 @@
 # else
 #  include "../local/install/include/attr/libattr.h"
 #  include "../local/install/include/acl/libacl.h"
-
 #endif
+
 char    has_xattr(const char *path, t_exit_status *exit_status);
 char    has_acl(const char *path, char **text, t_exit_status *exit_status);
 char    *format_acl_text(const char *acl_text);

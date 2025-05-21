@@ -45,24 +45,23 @@ typedef struct s_format_char {
     bool    is_null_char;
 } t_format_char;
 
-int		utoa_base(uintmax_t val, t_buffer *buf, int base, bool lowercase, t_format_number *format);
-int		itoa_base(intmax_t val, t_buffer *buf, int base, bool lower, t_format_number *format);
-int		build_prefix(uintmax_t val, t_buffer *buf, t_conversion *conv, t_format_number *format);
-void	emit_prefix(t_format_number *format, t_buffer *buf);
-void	compute_padding_zero(t_conversion *conv, t_format_number *format);
-void	emit_padding_zeros(t_format_number *format, t_buffer *buf);
-void	build_zeros_leading(t_buffer *buf, t_conversion *conv, t_format_number *format);
-void	compute_padding_space(t_conversion *conv, t_format_number *format);
-void	emit_padding_space(t_format_number *format, t_buffer *buf);
-void	emit_sign(intmax_t value, t_conversion *conv, t_format_number *format, t_buffer *buf);
-void 	emit_sign_u(t_conversion *conv, t_format_number *format, t_buffer *buf);
-void	emit_padding_after(t_conversion *conv, t_format_number *format, t_buffer *buf);
-void	compute_sign(intmax_t value, t_conversion *conv, t_format_number *format);
-void    compute_sign_u(t_conversion *conv, t_format_number *format);
-void	emit_integer(intmax_t value, t_conversion *conv, t_buffer *buf);
-void	emit_unsigned_integer(uintmax_t value, t_conversion *conv, t_buffer *buf);
-void    emit_string(const char *str, t_conversion *conv, t_buffer *buf);
-void 	emit_char( int c, t_conversion *conv, t_buffer *buf);
-uintmax_t get_unsigned_arg(va_list args, t_printf_length length);
-
+int			utoa_base(uintmax_t val, t_buffer *buf, int base, bool lowercase, t_format_number *format);
+int			itoa_base(intmax_t val, t_buffer *buf, int base, bool lower, t_format_number *format);
+int			build_prefix(uintmax_t val, t_buffer *buf, t_conversion *conv, t_format_number *format);
+void		emit_prefix(t_format_number *format, t_buffer *buf);
+void		compute_padding_zero(t_conversion *conv, t_format_number *format);
+void		emit_padding_zeros(t_format_number *format, t_buffer *buf);
+void		build_zeros_leading(t_buffer *buf, t_conversion *conv, t_format_number *format);
+void		compute_padding_space(t_conversion *conv, t_format_number *format);
+void		emit_padding_space(t_format_number *format, t_buffer *buf);
+void		emit_sign(intmax_t value, t_conversion *conv, t_format_number *format, t_buffer *buf);
+void 		emit_sign_u(t_conversion *conv, t_format_number *format, t_buffer *buf);
+void		emit_padding_after(t_conversion *conv, t_format_number *format, t_buffer *buf);
+void		compute_sign(intmax_t value, t_conversion *conv, t_format_number *format);
+void    	compute_sign_u(t_conversion *conv, t_format_number *format);
+void		emit_integer(intmax_t value, t_conversion *conv, t_buffer *buf);
+void		emit_unsigned_integer(uintmax_t value, t_conversion *conv, t_buffer *buf);
+void    	emit_string(const char *str, t_conversion *conv, t_buffer *buf);
+void 		emit_char( int c, t_conversion *conv, t_buffer *buf);
+uintmax_t	get_unsigned_arg(va_list args, t_printf_length length);
 #endif

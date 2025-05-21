@@ -95,13 +95,10 @@ typedef struct s_fileData
 	char            group[GROUP_NAME_MAX + 1];
 	char            link_target_buf[PATH_MAX];
 	
-
 	long long       fileSize;
 	long            linkNumber;
 	long long       blocSize;
-
 	bool            argument;
-	
 	char            fileType;
 	char            permission[11];
 	char            lastModified[20];

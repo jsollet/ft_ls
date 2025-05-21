@@ -1,7 +1,6 @@
 #ifndef PRINTF_PARSER_H
 # define  PRINTF_PARSER_H
 #include "./allheaders.h"
-#include <errno.h>
 #include "../libft/includes/libft.h"
 #include "./string_utils.h"
 #include "./buffer.h"
@@ -40,11 +39,8 @@ typedef struct s_width_precision {
     char is_star;
 } t_width_precision;
 
-
-
 typedef struct s_conversion {
     t_printf_specifier  specifier;
-
     int                 combined_flags;
     t_printf_length     length_mod;
     t_width_precision   width;
@@ -54,20 +50,11 @@ typedef struct s_conversion {
 
 typedef void (*t_formatter)(va_list, t_conversion*, t_buffer*);
 
-
-
-int     get_flags(const char *format, size_t *i);
-
-bool    is_valid_specifier(const char *format, size_t start);
-bool    is_valid_specifier_and_parse(const char *format, size_t start, t_conversion *conv);
-
-
-
-intmax_t get_int_arg(va_list args, t_printf_length length);
-uintmax_t get_uint_arg(va_list args, t_printf_length length);
+int         get_flags(const char *format, size_t *i);
+bool        is_valid_specifier(const char *format, size_t start);
+bool        is_valid_specifier_and_parse(const char *format, size_t start, t_conversion *conv);
+intmax_t    get_int_arg(va_list args, t_printf_length length);
+uintmax_t   get_uint_arg(va_list args, t_printf_length length);
 long double get_float_arg(va_list args, t_printf_length length);
-
-void handle_sign(intmax_t value, t_conversion *conv, t_buffer *buf);
-
-
+void        handle_sign(intmax_t value, t_conversion *conv, t_buffer *buf);
 #endif
