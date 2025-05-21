@@ -51,15 +51,15 @@ void free_fileData(t_fileData *file)
 
 	if (file->fileName) free(file->fileName);
 	if (file->absolutePath) free(file->absolutePath);
-	if (file->acl_text) free(file->acl_text);
-	if (file->xattrs  && file->has_xattr == '@') {
-		for (int j = 0; j < file->xattr_count; j++) {
-			if (file->xattrs[j].name){
-				free(file->xattrs[j].name);
-				free(file->xattrs[j].value);
+	if (file->xattr.acl_text) free(file->xattr.acl_text);
+	if (file->xattr.xattrs  && file->xattr.has_xattr == '@') {
+		for (int j = 0; j < file->xattr.xattr_count; j++) {
+			if (file->xattr.xattrs[j].name){
+				free(file->xattr.xattrs[j].name);
+				free(file->xattr.xattrs[j].value);
 			}
 		}
-		free(file->xattrs);
+		free(file->xattr.xattrs);
 	}
 	free(file);
 }

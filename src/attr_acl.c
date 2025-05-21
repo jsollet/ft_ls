@@ -27,11 +27,11 @@ void	fill_xattr_structure_1(t_fileData *file, char *buffer, ssize_t size){
 	while (i < size){
 
 		char *name = &buffer[i];
-		file->xattrs[j].name = ft_strdup(name);
+		file->xattr.xattrs[j].name = ft_strdup(name);
 		#ifdef __APPLE__
-		file->xattrs[j].size = getxattr(file->absolutePath, name, NULL, 0, 0, XATTR_NOFOLLOW);
+		file->xattr.xattrs[j].size = getxattr(file->absolutePath, name, NULL, 0, 0, XATTR_NOFOLLOW);
 		#else
-		file->xattrs[j].size = getxattr(file->absolutePath, name, NULL, 0);
+		file->xattr.xattrs[j].size = getxattr(file->absolutePath, name, NULL, 0);
 		#endif
 		i += ft_strlen(name) + 1;
 		j++;
@@ -47,8 +47,8 @@ void fill_xattr_structure(t_fileData *file, char *buffer, ssize_t size) {
         char *name = &buffer[i];
         ssize_t value_size;
 
-        file->xattrs[j].name = ft_strdup(name);
-        if (!file->xattrs[j].name) {
+        file->xattr.xattrs[j].name = ft_strdup(name);
+        if (!file->xattr.xattrs[j].name) {
             break;
         }
 
@@ -61,22 +61,22 @@ void fill_xattr_structure(t_fileData *file, char *buffer, ssize_t size) {
 
         if (value_size < 0) {
 
-            file->xattrs[j].size = 0;
-            file->xattrs[j].value = NULL;
+            file->xattr.xattrs[j].size = 0;
+            file->xattr.xattrs[j].value = NULL;
         } else {
-            file->xattrs[j].size = value_size;
+            file->xattr.xattrs[j].size = value_size;
 
-            file->xattrs[j].value = malloc(value_size);
-            if (file->xattrs[j].value) {
+            file->xattr.xattrs[j].value = malloc(value_size);
+            if (file->xattr.xattrs[j].value) {
                 #ifdef __APPLE__
-                    getxattr(file->absolutePath, name, file->xattrs[j].value, value_size, 0, XATTR_NOFOLLOW);
+                    getxattr(file->absolutePath, name, file->xattr.xattrs[j].value, value_size, 0, XATTR_NOFOLLOW);
                 #else
-                    getxattr(file->absolutePath, name, file->xattrs[j].value, value_size);
+                    getxattr(file->absolutePath, name, file->xattr.xattrs[j].value, value_size);
                 #endif
             }
             else {
-                file->xattrs[j].size = 0;
-                file->xattrs[j].value = NULL;
+                file->xattr.xattrs[j].size = 0;
+                file->xattr.xattrs[j].value = NULL;
             }
         }
 
@@ -120,17 +120,17 @@ void 	get_xattr(t_fileData *file,  t_exit_status *exit_status){
 		i += ft_strlen(&buffer[i]) + 1;
 		count++;
 	}
-	file->xattrs = malloc(sizeof(t_attr) * count);
-	if (!file->xattrs)
+	file->xattr.xattrs = malloc(sizeof(t_attr) * count);
+	if (!file->xattr.xattrs)
 	{
 		free(buffer);
 		set_exit_status(exit_status, 1, "NULL");
 		return ;
 	}
 	for (int j = 0; j < count; j++) {
-        file->xattrs[j].name = NULL;
+        file->xattr.xattrs[j].name = NULL;
     }
-	file->xattr_count = count;
+	file->xattr.xattr_count = count;
 	fill_xattr_structure(file, buffer, size);
 	free(buffer);
 }

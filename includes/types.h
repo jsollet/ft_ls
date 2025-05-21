@@ -16,18 +16,16 @@
 #define GROUP_NAME_MAX    		64
 
 
-#define FLAG_L_DYNAMIC  "%-10s%c %3ld %-*s %-*s %*lld %-10s %-10s"
-#define FLAG_LCOLOR_DYNAMIC "%-10s%c %3ld %-*s %-*s %*lld %-10s %s%-10s%s"
-#define FLAG_LGCOLOR_DYNAMIC "%-10s%c %3ld %-*s %*lld %-10s %s%-10s%s"
-#define FLAG_LG_DYNAMIC "%-10s%c %3ld %-*s %*lld %-10s %-10s"
 
+#define DISPLAY_FORMAT_LONG_G "%-10s%c %3ld %-*s %*lld %-10s %-10s"
+#define DISPLAY_FORMAT_LONG_G_COLOR "%-10s%c %3ld %-*s %*lld %-10s %s%-10s%s"
 
-#define FLAG_INACCESSIBLE "%-10s%c.%3s.%4s %-3s %-5s %-10s %-10s\n"
+#define DISPLAY_FORMAT_LONG "%-10s%c %3ld %-*s %-*s %*lld %-10s %-10s"
+#define DISPLAY_FORMAT_LONG_COLOR "%-10s%c %3ld %-*s %-*s %*lld %-10s %s%-10s%s"
 
+#define DISPLAY_FORMAT_INACCESSIBLE "%-10s%c %3s %-*s %-*s %*s %-10s %-10s\n"
+#define DISPLAY_FORMAT_INACCESSIBLE_G "%-10s%c %3s %-*s %*s %-10s %-10s\n"
 
-
-#define FLAG_INACCESSIBLE_DYN   "%-10s%c %3s %-*s %-*s %*s %-10s %-10s\n"
-#define FLAG_INACCESSIBLE_DYN_G "%-10s%c %3s %-*s %*s %-10s %-10s\n"
 
 typedef struct s_stack
 {
@@ -43,8 +41,6 @@ typedef struct s_flags
 	bool    a;
 	bool    l;
 	bool    t;
-
-
 	bool    e;
 	bool    at; 
 	bool    u;
@@ -54,7 +50,6 @@ typedef struct s_flags
 	bool    d;
 	bool    one;
 	bool    color;
-
 	bool	acl;
 	bool	attr;
 	bool	extended;
@@ -81,39 +76,49 @@ typedef struct s_dynamic_format {
 	size_t		max_owner_width;
 	size_t		max_group_width;
 	size_t		max_size_width;
-
 }	t_dynamic_format;
 
-typedef struct s_fileData
-{
-	bool            valid;        
-	char*           fileName;
-	unsigned char	d_type;
-	
-	char*           absolutePath;
+typedef struct s_fileOwner {
 	char            owner[OWNER_NAME_MAX + 1];
 	char            group[GROUP_NAME_MAX + 1];
-	char            link_target_buf[PATH_MAX];
-	
-	long long       fileSize;
-	long            linkNumber;
-	long long       blocSize;
-	bool            argument;
-	char            fileType;
-	char            permission[11];
-	char            lastModified[20];
+} t_fileOwner;
 
+typedef struct s_fileXattr {
 	t_attr          *xattrs;
 	char*           acl_text;
 	int             xattr_count;
 	bool            print_xattrs;
 	char            has_acl;
 	char            has_xattr;
+} t_fileXattr;
 
+typedef struct s_fileMeta {
+	ino_t           st_ino;
+	char            fileType;
+	char            permission[11];
+	long            linkNumber;
+	long long       fileSize;
 	unsigned long	st_mtime_nsec;
 	time_t          st_mtimes;
 	time_t          st_atimes;
-	ino_t           st_ino;
+	char            lastModified[20];
+	long long       blocSize;
+} t_fileMeta;
+
+typedef struct s_fileData
+{
+	bool            valid;        
+	char*           fileName;
+	unsigned char	d_type;
+	char*           absolutePath;
+	char            link_target_buf[PATH_MAX];
+	bool            argument;
+
+	
+	t_fileOwner     ownership;
+	t_fileMeta      meta;
+	t_fileXattr     xattr;
+
 }   t_fileData;
 
 typedef struct s_term

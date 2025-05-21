@@ -95,25 +95,25 @@ bool	fill_stat_data(const char *path, struct stat *sfile, t_fileData *file,  t_e
 
 
 void	fill_basic_info(t_fileData *file, struct stat *sfile, long *total_size){
-	file->fileSize = sfile->st_size;
-	file->linkNumber = sfile->st_nlink;
-	file->blocSize = sfile->st_blocks;
-	file->st_mtimes = sfile->st_mtime;
-	file->st_atimes = sfile->st_atime;
+	file->meta.fileSize = sfile->st_size;
+	file->meta.linkNumber = sfile->st_nlink;
+	file->meta.blocSize = sfile->st_blocks;
+	file->meta.st_mtimes = sfile->st_mtime;
+	file->meta.st_atimes = sfile->st_atime;
 	#ifdef __APPLE__
-		file->st_mtime_nsec = sfile->st_mtimespec.tv_nsec;
+		file->meta.st_mtime_nsec = sfile->st_mtimespec.tv_nsec;
 	#else
-		file->st_mtime_nsec = sfile->st_mtim.tv_nsec;
+		file->meta.st_mtime_nsec = sfile->st_mtim.tv_nsec;
 	#endif
-	file->st_ino = sfile->st_ino;
-	file->xattrs = NULL;
-	file->xattr_count = 0;
-	file->has_xattr = '0';
-	*total_size += file->blocSize;
+	file->meta.st_ino = sfile->st_ino;
+	file->xattr.xattrs = NULL;
+	file->xattr.xattr_count = 0;
+	file->xattr.has_xattr = '0';
+	*total_size += file->meta.blocSize;
 }
 
 void	fill_user_group_info(t_fileData *file, struct stat *sfile, t_exit_status *exit_status){
-	get_owner_group(sfile, file->owner, sizeof(file->owner),file->group, sizeof(file->group), exit_status);	
+	get_owner_group(sfile, file->ownership.owner, sizeof(file->ownership.owner),file->ownership.group, sizeof(file->ownership.group), exit_status);	
 }
 
 char convert_d_type_to_char(unsigned char d_type) {
@@ -130,54 +130,54 @@ char convert_d_type_to_char(unsigned char d_type) {
 }
 
 void	fill_inaccessible_fileInfo(t_fileData *file, const char *name){
-	ft_memset(file->permission, '?', 10); file->permission[10] = '\0';
-	ft_memset(file->lastModified, '?',19); file->lastModified[19] = '\0';
+	ft_memset(file->meta.permission, '?', 10); file->meta.permission[10] = '\0';
+	ft_memset(file->meta.lastModified, '?',19); file->meta.lastModified[19] = '\0';
 	if (file->d_type != DT_UNKNOWN) {
-        file->permission[0] = convert_d_type_to_char(file->d_type);
+        file->meta.permission[0] = convert_d_type_to_char(file->d_type);
     } else {       
         if (is_directory(name)) {
-            file->permission[0] = 'd';
+            file->meta.permission[0] = 'd';
         } else {
-            file->permission[0] = '-';
+            file->meta.permission[0] = '-';
         }
     }
-	file->fileSize = 0;
-	file->linkNumber = 0;
-	file->owner[0] = '?';file->owner[1] = '\0';
-	file->group[0] = '?';file->group[1] = '\0';
-	file->lastModified[0] = '?';file->lastModified[1] = '\0';
+	file->meta.fileSize = 0;
+	file->meta.linkNumber = 0;
+	file->ownership.owner[0] = '?';file->ownership.owner[1] = '\0';
+	file->ownership.group[0] = '?';file->ownership.group[1] = '\0';
+	file->meta.lastModified[0] = '?';file->meta.lastModified[1] = '\0';
 	file->valid = false;
 }
 
 void fill_permissions(t_fileData *file, struct stat *sfile){
-	file->fileType =get_file_type(sfile->st_mode);
-	file->permission[0] = file->fileType;
-	get_permissions(sfile->st_mode, file->permission);
+	file->meta.fileType =get_file_type(sfile->st_mode);
+	file->meta.permission[0] = file->meta.fileType;
+	get_permissions(sfile->st_mode, file->meta.permission);
 }
 
 void fill_extended_attrs(t_fileData *file, t_flags *flag, t_exit_status *exit_status){
 	if (ft_strcmp(file->fileName, ".") == 0 || ft_strcmp(file->fileName, "..") == 0) {
 		return;
 	}
-	file->acl_text = NULL;
-	file->has_xattr = ' ';
-	file->has_acl = ' ';
+	file->xattr.acl_text = NULL;
+	file->xattr.has_xattr = ' ';
+	file->xattr.has_acl = ' ';
 	if (flag->attr || flag->extended ||  flag->at) {
-		file->has_xattr= has_xattr(file->absolutePath, exit_status);
-		if (file->has_xattr == '@') {
+		file->xattr.has_xattr= has_xattr(file->absolutePath, exit_status);
+		if (file->xattr.has_xattr == '@') {
 			get_xattr(file, exit_status);
 		}
 	}
 	char *tmp = NULL;
 	if (flag->acl || flag->extended || flag->e) {
-		file->has_acl = has_acl(file->absolutePath, &tmp, exit_status);
-		if (file->has_acl == '?') {file->has_acl = ' ';}//
-		if (file->has_acl == '+')
+		file->xattr.has_acl = has_acl(file->absolutePath, &tmp, exit_status);
+		if (file->xattr.has_acl == '?') {file->xattr.has_acl = ' ';}//
+		if (file->xattr.has_acl == '+')
 		{
 			#ifdef __APPLE__
-				file->acl_text = format_acl_text(tmp);
+				file->xattr.acl_text = format_acl_text(tmp);
 			#else
-				file->acl_text = format_acl_text_linux(tmp);
+				file->xattr.acl_text = format_acl_text_linux(tmp);
 			#endif
 		}
 		acl_free(tmp);
@@ -188,24 +188,24 @@ void fill_last_modified(t_fileData *file, const struct stat *sfile, char flag_la
 	time_t timeStamp = (flag_label == 'u') ? sfile->st_atime : sfile->st_mtime;
 	const char *timeStr = ctime(&timeStamp);
 	if (!timeStr) {
-		file->lastModified[0] = '\0';
+		file->meta.lastModified[0] = '\0';
 		return;
 	}
 	char timeBuf[26];
 	ft_memcpy(timeBuf, timeStr, 25);
 	timeBuf[24] = '\0';
 	if (now - timeStamp > SIX_MONTHS_IN_SECONDS) {
-		ft_strlcpy(file->lastModified, timeBuf + 4, 8);
-		ft_strlcat(file->lastModified, " ", sizeof(file->lastModified));
-		ft_strlcat(file->lastModified, timeBuf + 20, sizeof(file->lastModified));
+		ft_strlcpy(file->meta.lastModified, timeBuf + 4, 8);
+		ft_strlcat(file->meta.lastModified, " ", sizeof(file->meta.lastModified));
+		ft_strlcat(file->meta.lastModified, timeBuf + 20, sizeof(file->meta.lastModified));
 	} else {
-		ft_strlcpy(file->lastModified, timeBuf + 4, 13);
+		ft_strlcpy(file->meta.lastModified, timeBuf + 4, 13);
 	}
 }
 
 
 void fill_symlink_target(const char *path, t_fileData *file, t_exit_status *exit_status) {
-	if (file->fileType == 'l'){
+	if (file->meta.fileType == 'l'){
 		get_symlink_target(path, file->link_target_buf, sizeof(file->link_target_buf), exit_status);		
 	}
 	else {
@@ -234,13 +234,13 @@ void    get_fileInfo(const char* path, t_fileData *file,  t_flags *flag,long *to
 	if ((result = ft_strlen(file->fileName)) > dyn_format->max_name_width) {
 		dyn_format->max_name_width = result;
 	}
-	if ((result = ft_strlen(file->owner)) > dyn_format->max_owner_width) {
+	if ((result = ft_strlen(file->ownership.owner)) > dyn_format->max_owner_width) {
 		dyn_format->max_owner_width = result;
 	}
-	if ((result = ft_strlen(file->group)) > dyn_format->max_group_width) {
+	if ((result = ft_strlen(file->ownership.group)) > dyn_format->max_group_width) {
 		dyn_format->max_group_width = result;
 	}
-	if ((result = ft_intlen(file->fileSize)) > dyn_format->max_size_width) {
+	if ((result = ft_intlen(file->meta.fileSize)) > dyn_format->max_size_width) {
 		dyn_format->max_size_width = result;
 	}
 } 

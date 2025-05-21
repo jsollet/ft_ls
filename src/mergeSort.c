@@ -20,13 +20,13 @@ int	compare_by_fileName(t_fileData *a, t_fileData *b) {
 
 
 int compare_by_time(t_fileData *a, t_fileData *b) {
-	if (a->st_mtimes > b->st_mtimes)
+	if (a->meta.st_mtimes > b->meta.st_mtimes)
 		return -1;
-	else if (a->st_mtimes < b->st_mtimes)
+	else if (a->meta.st_mtimes < b->meta.st_mtimes)
 		return 1;
-	if (a->st_mtime_nsec > b->st_mtime_nsec)
+	if (a->meta.st_mtime_nsec > b->meta.st_mtime_nsec)
 		return -1;
-	else if (a->st_mtime_nsec < b->st_mtime_nsec)
+	else if (a->meta.st_mtime_nsec < b->meta.st_mtime_nsec)
 		return 1;
 	return ft_strcmp(a->fileName, b->fileName);
 }
@@ -38,13 +38,13 @@ int compare_by_fileName_reverse(t_fileData *a, t_fileData *b) {
 
 
 int compare_by_time_reverse(t_fileData *a, t_fileData *b) {
-	if (a->st_mtimes < b->st_mtimes)
+	if (a->meta.st_mtimes < b->meta.st_mtimes)
 		return -1;
-	else if (a->st_mtimes > b->st_mtimes)
+	else if (a->meta.st_mtimes > b->meta.st_mtimes)
 		return 1;
-	if (a->st_mtime_nsec < b->st_mtime_nsec)
+	if (a->meta.st_mtime_nsec < b->meta.st_mtime_nsec)
 		return -1;
-	else if (a->st_mtime_nsec > b->st_mtime_nsec)
+	else if (a->meta.st_mtime_nsec > b->meta.st_mtime_nsec)
 		return 1;
 	return ft_strcmp(a->fileName, b->fileName);
 }
