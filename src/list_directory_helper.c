@@ -22,14 +22,13 @@ void    list_directory(t_flags *flags, t_stack **directories_to_process, t_stack
 	if (flags->bigR)
 		first_dir = true;
 	if (( *directories_to_process == NULL && *fileList == NULL )) {
-		
 		push(directories_to_process, ".");
 	}
 	if (( *directories_to_process != NULL && *fileList != NULL )){
 		first_dir = true;
 	}
 
-	if (fileList != NULL && *fileList != NULL) { // pas ici
+	if (fileList != NULL && *fileList != NULL) {
 		process_argument_files(&files, directories_to_process, fileList, flags, exit_status, now, &dyn_format);
 		display_sorted_files(true,&files, flags, false, &dyn_format);
 		reset_dyn(&files);
@@ -41,7 +40,6 @@ void    list_directory(t_flags *flags, t_stack **directories_to_process, t_stack
 			process_argument_files(&files, NULL, directories_to_process, flags, exit_status, now, &dyn_format);
 		
 		display_sorted_files(true, &files, flags, false, &dyn_format);
-
 		free_dyn(&files);
 		return;
 	} else if (!flags->d)
@@ -49,8 +47,9 @@ void    list_directory(t_flags *flags, t_stack **directories_to_process, t_stack
 			while(*directories_to_process)
 			{
 				char *current_dir = pop(directories_to_process);
-				if (need_newline)
-        			ft_printf("\n");
+				if (need_newline) {
+					ft_printf("\n");
+				}
 				process_directory(current_dir, &files, flags,directories_to_process, first_dir, exit_status, now, &dyn_format);
 				need_newline = true;
 				free(current_dir);
@@ -60,7 +59,6 @@ void    list_directory(t_flags *flags, t_stack **directories_to_process, t_stack
 		}
 	free_dyn(&files);
 }
-
 
 void	process_argument_files(t_dyn *files,t_stack **directories_to_process, t_stack **fileList, t_flags *flag, t_exit_status *exit_status, time_t now, t_dynamic_format *dyn_format){
 	size_t		result;
@@ -101,9 +99,9 @@ void	process_argument_files(t_dyn *files,t_stack **directories_to_process, t_sta
 
 void process_directory(const char *dir, t_dyn *files, t_flags *flags, t_stack **directories_to_process, bool first_dir, t_exit_status *exit_status, time_t now, t_dynamic_format *dyn_format) {
 	bool an_error = list_directory_helper(dir, files, flags, directories_to_process, exit_status,  now, dyn_format);
-	if (!an_error && (first_dir || flags->bigR))
+	if (!an_error && (first_dir || flags->bigR)){
 		ft_printf("%s:\n", dir);
-
+	}
 	display_sorted_files(an_error, files, flags, true, dyn_format);
 }
 
@@ -120,9 +118,9 @@ bool    list_directory_helper(const char *path, t_dyn *files, t_flags *flags, t_
     return true;
 	}
 	if (!S_ISDIR(sb.st_mode)) {
-    fprintf(stderr, "Not a directory: %s\n", path);
-    closedir(dir);
-    return true;
+		ft_printf_fd(2, "Not a directory: %s\n", path);
+    	closedir(dir);
+    	return true;
 	}
 
 	if (!dir)
@@ -130,12 +128,10 @@ bool    list_directory_helper(const char *path, t_dyn *files, t_flags *flags, t_
 		return handle_dir_open_error(path);
 	}
 
-
 	t_dyn subdirs;
-	init_dyn(&subdirs); 
-	
+	init_dyn(&subdirs); 	
 	struct dirent *entry;
-	
+
 	while (1){
 		errno = 0;
 		entry = readdir(dir);
@@ -166,9 +162,9 @@ bool    list_directory_helper(const char *path, t_dyn *files, t_flags *flags, t_
 
 		
 	}
-	//
+	
 	if (errno != 0) {
-		fprintf(stderr, "ft_ls: %s  ", path);
+		ft_printf_fd(2, "ft_ls: %s  ", path);
 		perror("");
 	}
 
@@ -191,24 +187,18 @@ bool    list_directory_helper(const char *path, t_dyn *files, t_flags *flags, t_
 t_fileData	*create_fileData(const char *dir_path, struct dirent *entry,t_flags *flag, long *total_size, t_exit_status *exit_status, time_t now,  t_dynamic_format *dyn_format){
 	t_fileData *file = malloc_fileData();
 	if (!file) return NULL;
-
 	file->d_type = entry->d_type;
 	file->fileName = ft_strdup(entry->d_name);
 	char *fullPath = ft_strjoin_multiple(dir_path, "/", entry->d_name, NULL);
-	
 	file->absolutePath = fullPath; 
-
 	errno = 0;
 	get_fileInfo(fullPath,file,flag,total_size, exit_status, now, dyn_format);
-
 	return file;
 }
 
 bool	handle_subdir(t_dyn *subdirs, t_fileData *file) {
-
 	t_fileData *subdir = malloc_fileData();
 	if (!subdir) return false;
-
 	subdir->fileName = ft_strdup(file->absolutePath);
 	subdir->absolutePath = ft_strdup(file->absolutePath);
 	subdir->owner[0] = '\0';

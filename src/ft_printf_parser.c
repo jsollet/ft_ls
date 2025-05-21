@@ -41,10 +41,8 @@ void handle_sign(intmax_t value, t_conversion *conv, t_buffer *buf){
     }
 }
 
-
 int get_flags(const char *format, size_t *i) {
     int flags = NONE;
-
     while ((format[*i] != '\0') && format[*i] && ft_strchr("-+ 0#", format[*i])){
         if (format[*i] == '-') flags |= MINUS;
         else if (format[*i] == '+') flags |= PLUS;
@@ -56,36 +54,6 @@ int get_flags(const char *format, size_t *i) {
     return flags;
 }
 
-
-
-bool is_valid_specifier(const char *format, size_t start) {
-    if (format[start] == '%' && format[start + 1] == '%')
-		return true;
-	if (format[start] != '%') return false;
-    else if (format[start + 1] == '\0') return false;
-	size_t i = start + 1;
-
-	i += skip_while(format + i, "-+ 0#", 0);
-
-	while ((format[i] != '\0') && (ft_isdigit(format[i]) || format[i] == '*')) i++;
-
-	if (format[i] == '.') {
-		i++;
-		while ((format[i] != '\0') && (ft_isdigit(format[i]) || format[i] == '*')) i++;
-	}
-
-	if (format[i] != '\0' &&(ft_strncmp(format + i, "hh", 2) == 0 || ft_strncmp(format + i, "ll", 2) == 0))
-		i += 2;
-	else if (format[i] != '\0' && ft_strchr(LENGTH_1, format[i]))
-		i++;
-
-	if (format[i] != '\0' && ft_strchr(SPECIFIERS, format[i]))
-		return true;
-	return false;
-}
-
-
-
 bool is_valid_specifier_and_parse(const char *format, size_t start, t_conversion *conv) {
 	if (format[start] == '%' && format[start + 1] == '%')
     {
@@ -93,20 +61,14 @@ bool is_valid_specifier_and_parse(const char *format, size_t start, t_conversion
         return true;
     }
 	conv->has_precision = false;
-    	
     if (format[start] != '%') return false;
     else if (format[start + 1] == '\0') return false;
 	size_t i = start + 1;
-
-	// skip flags
     conv->combined_flags = get_flags(format, &i);
-
-	// skip width
     conv->width.is_star = 0;
     conv->width.value = 0; 
     if ((format[i] != '\0') && format[i] == '*'){
         conv->width.is_star = 1;
-        
         i++;
     } else {
         while ((format[i] != '\0') && ft_isdigit(format[i])) {
@@ -114,8 +76,6 @@ bool is_valid_specifier_and_parse(const char *format, size_t start, t_conversion
             i++;
         }
     }
-
-	// skip precision
     conv->precision.is_star = 0;
     conv->precision.value = 0; 
 	if ((format[i] != '\0') && format[i] == '.') {
@@ -132,8 +92,6 @@ bool is_valid_specifier_and_parse(const char *format, size_t start, t_conversion
             }
         }
 	}
-
-	// skip length modifiers
     conv->length_mod = NONE_LENGTH;
     if ((format[i] != '\0') && ft_strncmp(format + i, "hh", 2) ==  0){
         conv->length_mod = hh;
@@ -154,24 +112,18 @@ bool is_valid_specifier_and_parse(const char *format, size_t start, t_conversion
         }
         i++;
     }
-		
-
-
 	if (format[i] != '\0' && ft_strchr(SPECIFIERS, format[i])){
         conv->specifier = format[i];
-       
     } else if (format[i] == '%'){
         conv->specifier = percent;
     } else {
         return false;
     }
-    // normalisation 
 
     if ((conv->combined_flags & ZERO) && (conv->precision.value >= 0 || (conv->combined_flags & MINUS))) 
     {
         conv->combined_flags &= ~ZERO;
     }
-
     if ((conv->combined_flags & PLUS) && (conv->combined_flags & SPACE)) {
         conv->combined_flags &= ~SPACE;
     }

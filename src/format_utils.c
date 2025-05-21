@@ -41,32 +41,26 @@ int itoa_base(intmax_t val, t_buffer *buf, int base, bool lower, t_format_number
     char tmp[64];
     int i = 0;
     bool is_negative = false;
-
     uintmax_t uval;
-
     if (val < 0) {
         is_negative = true;
         uval = (uintmax_t)(-(val + 1)) + 1;
     } else {
         uval = (uintmax_t)val;
     }
-
     if (uval == 0) {
         buf_putchar(buf, '0');
         format->number_len = 1;
         format->sign = is_negative;
         return 1;
     }
-
     while (uval > 0) {
         tmp[i++] = digits[uval % base];
         uval /= base;
     }
-
     for (int j = i - 1; j >= 0; --j) {
         buf_putchar(buf, tmp[j]);
     }
-
     format->number_len = i;
     format->sign = is_negative;
     return i;

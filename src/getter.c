@@ -12,14 +12,12 @@ void get_owner_group(struct stat *sfile, char *owner, size_t owner_size,
 	bool error = false;
 	struct passwd *pwd = getpwuid(sfile->st_uid);
 	struct group  *grp = getgrgid(sfile->st_gid);
-
 	if (pwd)
 		ft_strlcpy(owner, pwd->pw_name, owner_size);
 	else {
 		ft_strlcpy(owner, "UNKNOWN", owner_size);
 		error = true;
 	}
-
 	if (grp)
 		ft_strlcpy(group, grp->gr_name, group_size);
 	else {
@@ -76,7 +74,6 @@ void apply_special_bits(mode_t mode, char *perm) {
 
 void	get_symlink_target(const char *path,char *link_target_buf, size_t buf_size , t_exit_status *exit_status){
 	ssize_t len = readlink(path, link_target_buf, buf_size - 1);
-
 	if (len != -1){
 		link_target_buf[len] = '\0';
 	} else {
@@ -86,13 +83,11 @@ void	get_symlink_target(const char *path,char *link_target_buf, size_t buf_size 
 }
 
 
-bool	fill_stat_data(const char *path, struct stat *sfile, t_fileData *file,  t_exit_status *exit_status){ // ajout de t_fileData *file
+bool	fill_stat_data(const char *path, struct stat *sfile, t_fileData *file,  t_exit_status *exit_status){
 	if (lstat(path, sfile) == -1) {
-
 		fill_inaccessible_fileInfo(file, path);
 		ft_printf_fd(2, "ft_ls: %s: %s\n", path, strerror(errno)); 
 		set_exit_status(exit_status, 1, strerror(errno));
-		
 		return false;
 	}
 	return true;
@@ -111,11 +106,9 @@ void	fill_basic_info(t_fileData *file, struct stat *sfile, long *total_size){
 		file->st_mtime_nsec = sfile->st_mtim.tv_nsec;
 	#endif
 	file->st_ino = sfile->st_ino;
-
 	file->xattrs = NULL;
 	file->xattr_count = 0;
 	file->has_xattr = '0';
-
 	*total_size += file->blocSize;
 }
 
@@ -137,28 +130,22 @@ char convert_d_type_to_char(unsigned char d_type) {
 }
 
 void	fill_inaccessible_fileInfo(t_fileData *file, const char *name){
-
-	
 	ft_memset(file->permission, '?', 10); file->permission[10] = '\0';
 	ft_memset(file->lastModified, '?',19); file->lastModified[19] = '\0';
-	
 	if (file->d_type != DT_UNKNOWN) {
         file->permission[0] = convert_d_type_to_char(file->d_type);
-    } else {
-        
+    } else {       
         if (is_directory(name)) {
             file->permission[0] = 'd';
         } else {
             file->permission[0] = '-';
         }
     }
-
 	file->fileSize = 0;
 	file->linkNumber = 0;
 	file->owner[0] = '?';file->owner[1] = '\0';
 	file->group[0] = '?';file->group[1] = '\0';
 	file->lastModified[0] = '?';file->lastModified[1] = '\0';
-
 	file->valid = false;
 }
 
@@ -169,24 +156,21 @@ void fill_permissions(t_fileData *file, struct stat *sfile){
 }
 
 void fill_extended_attrs(t_fileData *file, t_flags *flag, t_exit_status *exit_status){
-	if (strcmp(file->fileName, ".") == 0 || strcmp(file->fileName, "..") == 0) {
+	if (ft_strcmp(file->fileName, ".") == 0 || ft_strcmp(file->fileName, "..") == 0) {
 		return;
 	}
 	file->acl_text = NULL;
 	file->has_xattr = ' ';
 	file->has_acl = ' ';
-
 	if (flag->attr || flag->extended ||  flag->at) {
 		file->has_xattr= has_xattr(file->absolutePath, exit_status);
 		if (file->has_xattr == '@') {
 			get_xattr(file, exit_status);
 		}
 	}
-
 	char *tmp = NULL;
 	if (flag->acl || flag->extended || flag->e) {
 		file->has_acl = has_acl(file->absolutePath, &tmp, exit_status);
-
 		if (file->has_acl == '?') {file->has_acl = ' ';}//
 		if (file->has_acl == '+')
 		{
@@ -196,24 +180,20 @@ void fill_extended_attrs(t_fileData *file, t_flags *flag, t_exit_status *exit_st
 				file->acl_text = format_acl_text_linux(tmp);
 			#endif
 		}
-		
 		acl_free(tmp);
 	}
 }
 
 void fill_last_modified(t_fileData *file, const struct stat *sfile, char flag_label, time_t now) {
 	time_t timeStamp = (flag_label == 'u') ? sfile->st_atime : sfile->st_mtime;
-
 	const char *timeStr = ctime(&timeStamp);
 	if (!timeStr) {
 		file->lastModified[0] = '\0';
 		return;
 	}
-
 	char timeBuf[26];
 	ft_memcpy(timeBuf, timeStr, 25);
 	timeBuf[24] = '\0';
-
 	if (now - timeStamp > SIX_MONTHS_IN_SECONDS) {
 		ft_strlcpy(file->lastModified, timeBuf + 4, 8);
 		ft_strlcat(file->lastModified, " ", sizeof(file->lastModified));
@@ -243,7 +223,6 @@ void    get_fileInfo(const char* path, t_fileData *file,  t_flags *flag,long *to
 
 	if (!fill_stat_data(path, &sfile, file, exit_status))
 		return;
-
 	fill_basic_info(file, &sfile, total_size);
 	fill_user_group_info(file, &sfile, exit_status);
 	fill_permissions(file, &sfile);
@@ -252,7 +231,6 @@ void    get_fileInfo(const char* path, t_fileData *file,  t_flags *flag,long *to
 	}
 	fill_last_modified(file, &sfile, flag_label, now);
 	fill_symlink_target(path, file, exit_status);
-	
 	if ((result = ft_strlen(file->fileName)) > dyn_format->max_name_width) {
 		dyn_format->max_name_width = result;
 	}

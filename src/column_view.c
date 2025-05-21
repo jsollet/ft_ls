@@ -4,8 +4,6 @@
 #include "../libft/includes/libftprintf.h"
 #include "../includes/ft_printf1.h"
 
-
-
 void    init_terminal(t_term *t){
 	ioctl(STDOUT_FILENO, TIOCGWINSZ, &t->w);
 	t->term_width = t->w.ws_col;
@@ -28,9 +26,7 @@ void    print_files_in_columns(char **files, t_term *t, char **color) {
 	const char *reset = RESET_COLOR;
 	int cols = t->term_width / t->col_width;
 	if (cols == 0) cols = 1;
-
 	int rows = (t->count + cols - 1) / cols;
-	
 	for (int row = 0; row < rows; row++) {
 		for (int col = 0; col < cols; col++) {
 			size_t index = col * rows + row;
@@ -48,7 +44,6 @@ void    print_files_in_columns(char **files, t_term *t, char **color) {
 				}
 			}
 		}
-
 		ssize_t _unused=write(1, "\n", 1);
 		(void)_unused;
 	}

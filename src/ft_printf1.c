@@ -1,22 +1,17 @@
 #include "../includes/buffer.h"
 #include "../includes/ft_printf1.h"
 
-
-
 int ft_printf1(const char *fmt, ...) {
     va_list args;
     int printed = 0;
-
     va_start(args, fmt);
     printed = ft_vprintf(fmt, args);
     va_end(args);
-
     return printed;
 }
 
 int ft_vprintf(const char *fmt, va_list args) {
 	t_buffer buf;
-
 	char *res;
     buf_init_fd(&buf, STDOUT_FILENO,  BUF_TEXT);
 	size_t pos = 0;
@@ -46,7 +41,6 @@ int ft_vprintf(const char *fmt, va_list args) {
                     conv.has_precision = false;
                 }
             }
-
 			if (conv.specifier == 'i' || conv.specifier == 'd'){
 				intmax_t value = get_int_arg(args, conv.length_mod);
 				t_buffer buf_temp ;
@@ -57,7 +51,6 @@ int ft_vprintf(const char *fmt, va_list args) {
 				
 			} else if (conv.specifier == 'u' || conv.specifier == 'x' || conv.specifier == 'X' || conv.specifier == 'o'){
                 uintmax_t value = get_unsigned_arg(args, conv.length_mod);
-
     			t_buffer buf_temp;
     			char temp[1024];
     			buf_init_fixed(&buf_temp, temp, sizeof(temp), BUF_TEXT);
@@ -67,7 +60,6 @@ int ft_vprintf(const char *fmt, va_list args) {
                 buf_putchar(&buf, '%');
             } else if (conv.specifier == 's') {
 				char *str = va_arg(args, char *);
-
                 t_buffer buf_temp;
                 buf_init_dynamic(&buf_temp, BUF_TEXT);
                 emit_string(str, &conv, &buf_temp);
@@ -81,7 +73,6 @@ int ft_vprintf(const char *fmt, va_list args) {
                 emit_char(c, &conv, &buf_temp);
                 buf_putstrn(&buf, buf_temp.data, buf_temp.length); 
                 }
-			
             free(res);
         } 
     }

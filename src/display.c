@@ -3,6 +3,7 @@
 #include "../includes/ft_printf1.h"
 
 void display_sorted_files(bool an_error,t_dyn *files, t_flags *flags, bool is_directory, t_dynamic_format *dyn_format) {
+	char attribute;
 	char *reset = RESET_COLOR;
 	char *color = reset;
 	t_color_rule color_rules[] = {
@@ -19,8 +20,7 @@ void display_sorted_files(bool an_error,t_dyn *files, t_flags *flags, bool is_di
 		{0, NULL, RESET_COLOR}
 	};
 
-	char attribute ;
-	char *format = ft_strdup("%-10s %3ld %-10s %10s %7ld %-20s %-30s");
+	
 	if (!flags->U){
 		int (*cmp)(t_fileData *, t_fileData *) = get_cmp_func(flags);
 		mergeSort_iterative(files->list, files->length, cmp);
@@ -32,7 +32,7 @@ void display_sorted_files(bool an_error,t_dyn *files, t_flags *flags, bool is_di
 			#ifdef __APPLE__
 				ft_printf1("total %lld\n", files->total_size);
 			#else
-				ft_printf1("total %lld\n", files->total_size/ 2);
+				ft_printf1("total %lld\n", files->total_size / 2);
 			#endif
 			}
 		
@@ -42,7 +42,6 @@ void display_sorted_files(bool an_error,t_dyn *files, t_flags *flags, bool is_di
 				attribute = files->list[i]->has_acl;
 			if (attribute == '0')
 				attribute = ' ' ;
-			
 			
 			if (flags->color){
 				color = select_color_new(files->list[i], color_rules);
@@ -131,5 +130,4 @@ void display_sorted_files(bool an_error,t_dyn *files, t_flags *flags, bool is_di
 		else
 			list_directory_line(arr, color, files->length);
 	}
-	free(format);
 }

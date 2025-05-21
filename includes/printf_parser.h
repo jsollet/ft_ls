@@ -51,7 +51,6 @@ typedef struct s_conversion {
 typedef void (*t_formatter)(va_list, t_conversion*, t_buffer*);
 
 int         get_flags(const char *format, size_t *i);
-bool        is_valid_specifier(const char *format, size_t start);
 bool        is_valid_specifier_and_parse(const char *format, size_t start, t_conversion *conv);
 intmax_t    get_int_arg(va_list args, t_printf_length length);
 uintmax_t   get_uint_arg(va_list args, t_printf_length length);

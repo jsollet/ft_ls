@@ -104,7 +104,7 @@ void 	get_xattr(t_fileData *file,  t_exit_status *exit_status){
         return;
     }
 
-	buffer = malloc(size); // 
+	buffer = malloc(size);
 	if (!buffer){
 		set_exit_status(exit_status, 1, "NULL");
 		return;

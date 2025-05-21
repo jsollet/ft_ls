@@ -1,8 +1,6 @@
 #include "../includes/buffer.h"
 #include "../includes/utils.h"
 
-
-
 int buf_grow(t_buffer *buf, size_t required_space) {
     size_t new_capacity = buf->capacity;
 
@@ -12,7 +10,6 @@ int buf_grow(t_buffer *buf, size_t required_space) {
             new_capacity = required_space;
         }
     }
-
     char *new_data = malloc(new_capacity);
     if (!new_data) {
         perror("buf_grow: malloc failed\n");

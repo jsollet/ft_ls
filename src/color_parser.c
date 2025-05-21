@@ -1,7 +1,6 @@
 #include "../includes/color.h"
 #include "../includes/color_parser.h"
 
-
 bool    is_executable(t_fileData *file) {
     return file->permission[3] == 'x' || file->permission[6] == 'x' || file->permission[9] == 'x';
 }
