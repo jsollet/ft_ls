@@ -353,6 +353,7 @@ bool	handle_subdir(t_dyn *subdirs, t_fileData *file) {
 	subdir->meta.st_mtimes = file->meta.st_mtimes;
 	subdir->meta.st_atimes = file->meta.st_atimes;
 	subdir->meta.st_mtime_nsec = file->meta.st_mtime_nsec;
+	subdir->meta.st_atime_nsec = file->meta.st_atime_nsec;//
 	subdir->meta.st_ino = file->meta.st_ino;
 	append(subdirs, subdir);
 	return true;
