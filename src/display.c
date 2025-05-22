@@ -89,6 +89,7 @@ void display_sorted_files(bool an_error,t_dyn *files, t_flags *flags, bool is_di
 			attribute = files->list[i]->xattr.has_xattr;
 			if (attribute == ' ') {attribute = files->list[i]->xattr.has_acl;}
 			if (attribute == '0') {attribute = ' ';}
+			//printf("File: %s xattr: |%c| acl: |%c|\n", files->list[i]->absolutePath, files->list[i]->xattr.has_xattr, files->list[i]->xattr.has_acl);
 						
 			if (display_inacessible_file(i, files, flags, dyn_format)){continue;}
 

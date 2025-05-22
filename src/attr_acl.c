@@ -47,6 +47,13 @@ void fill_xattr_structure(t_fileData *file, char *buffer, ssize_t size) {
         char *name = &buffer[i];
         ssize_t value_size;
 
+	// ⚠️ Filtrage des attributs ACL système (non affichés par `ls -l@`)
+        if (ft_strcmp(name, "system.posix_acl_access") == 0 ||
+            ft_strcmp(name, "system.posix_acl_default") == 0) {
+            i += ft_strlen(name) + 1;
+            continue;
+        }
+
         file->xattr.xattrs[j].name = ft_strdup(name);
         if (!file->xattr.xattrs[j].name) {
             break;
@@ -66,13 +73,14 @@ void fill_xattr_structure(t_fileData *file, char *buffer, ssize_t size) {
         } else {
             file->xattr.xattrs[j].size = value_size;
 
-            file->xattr.xattrs[j].value = malloc(value_size);
+            file->xattr.xattrs[j].value = malloc(value_size + 1);
             if (file->xattr.xattrs[j].value) {
                 #ifdef __APPLE__
                     getxattr(file->absolutePath, name, file->xattr.xattrs[j].value, value_size, 0, XATTR_NOFOLLOW);
                 #else
                     getxattr(file->absolutePath, name, file->xattr.xattrs[j].value, value_size);
                 #endif
+		file->xattr.xattrs[j].value[value_size] = '\0';
             }
             else {
                 file->xattr.xattrs[j].size = 0;
@@ -83,6 +91,7 @@ void fill_xattr_structure(t_fileData *file, char *buffer, ssize_t size) {
         i += ft_strlen(name) + 1;
         j++;
     }
+    file->xattr.xattr_count = j;//
 }
 
 
@@ -204,9 +213,12 @@ char has_acl(const char *path, char **text, t_exit_status *exit_status)
 			set_exit_status(exit_status, 1, strerror(errno));
 			return ' ';
 		}
-		unsigned int equiv;
-		if (acl_equiv_mode(acl, &equiv) == 0 && equiv == 0) {
+		mode_t  equiv;
+		int res = acl_equiv_mode(acl, &equiv);
+		//printf("res = %d equiv = %d\n", res, equiv);
+		if (res == 1) {
 			// vraie ACL étendue
+			//printf("vrai acl\n");
 			*text = acl_to_text(acl, NULL);
 			acl_free(acl);
 			return (*text != NULL) ? '+' : ' ';
@@ -216,6 +228,24 @@ char has_acl(const char *path, char **text, t_exit_status *exit_status)
 	#endif
 }
 
+char has_acl_pb(const char *path, char **text, t_exit_status *exit_status)
+{
+	acl_t acl = NULL;
+	#ifdef __APPLE__
+		acl = acl_get_file(path, ACL_TYPE_EXTENDED);
+	#else
+		acl = acl_get_file(path, ACL_TYPE_ACCESS);
+	#endif
+	if (acl == NULL) {
+		set_exit_status(exit_status, 1, strerror(errno));
+		return ' ';
+	}
+
+	*text = acl_to_text(acl, NULL);
+	acl_free(acl);
+
+	return (*text != NULL) ? '+' : ' ';
+}
 
 
 char *check_and_free(char **tokens, char *line) {
