@@ -102,8 +102,10 @@ void	fill_basic_info(t_fileData *file, struct stat *sfile, long *total_size){
 	file->meta.st_atimes = sfile->st_atime;
 	#ifdef __APPLE__
 		file->meta.st_mtime_nsec = sfile->st_mtimespec.tv_nsec;
+		file->meta.st_atime_nsec = sfile->st_atimespec.tv_nsec;
 	#else
 		file->meta.st_mtime_nsec = sfile->st_mtim.tv_nsec;
+		file->meta.st_atime_nsec = sfile->st_atim.tv_nsec;
 	#endif
 	file->meta.st_ino = sfile->st_ino;
 	file->xattr.xattrs = NULL;
@@ -185,6 +187,8 @@ void fill_extended_attrs(t_fileData *file, t_flags *flag, t_exit_status *exit_st
 }
 
 void fill_last_modified(t_fileData *file, const struct stat *sfile, char flag_label, time_t now) {
+	// Format ctime: "Wed Jun 30 21:49:08 1993\n\0"
+	//                ^^^ ^^^ ^^ ^^^^^^^^ ^^^^
 	time_t timeStamp = (flag_label == 'u') ? sfile->st_atime : sfile->st_mtime;
 	const char *timeStr = ctime(&timeStamp);
 	if (!timeStr) {
@@ -192,14 +196,16 @@ void fill_last_modified(t_fileData *file, const struct stat *sfile, char flag_la
 		return;
 	}
 	char timeBuf[26];
+	const char *month_day = timeBuf + 4;
+	const char *year = timeBuf + 20;  
 	ft_memcpy(timeBuf, timeStr, 25);
 	timeBuf[24] = '\0';
 	if (now - timeStamp > SIX_MONTHS_IN_SECONDS) {
-		ft_strlcpy(file->meta.lastModified, timeBuf + 4, 8);
+		ft_strlcpy(file->meta.lastModified, month_day, 8);
 		ft_strlcat(file->meta.lastModified, " ", sizeof(file->meta.lastModified));
-		ft_strlcat(file->meta.lastModified, timeBuf + 20, sizeof(file->meta.lastModified));
+		ft_strlcat(file->meta.lastModified, year, sizeof(file->meta.lastModified));
 	} else {
-		ft_strlcpy(file->meta.lastModified, timeBuf + 4, 13);
+		ft_strlcpy(file->meta.lastModified, month_day, 13);
 	}
 }
 

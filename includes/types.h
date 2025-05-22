@@ -100,6 +100,7 @@ typedef struct s_fileMeta {
 	long long       fileSize;
 	unsigned long	st_mtime_nsec;
 	time_t          st_mtimes;
+	unsigned long	st_atime_nsec;
 	time_t          st_atimes;
 	char            lastModified[20];
 	long long       blocSize;

@@ -131,7 +131,7 @@ void display_sorted_files(bool an_error,t_dyn *files, t_flags *flags, bool is_di
 				ft_printf1(" -> %s", files->list[i]->link_target_buf);
 			}
 			if (flags->e && files->list[i]->xattr.acl_text){
-				ft_printf1("\n%s\n", files->list[i]->xattr.acl_text);
+				ft_printf1("\n%s", files->list[i]->xattr.acl_text);
 			}
 			if (flags->at && files->list[i]->xattr.has_xattr== '@'){
 				for (int j=0;j < files->list[i]->xattr.xattr_count; j++){

@@ -62,10 +62,10 @@ bool    parse_flags(int argc, char *argv[], t_flags *flags){
 				else if (argv[index][position] == 't') flags->t = true;
 				else if (argv[index][position] == 'g') {flags->g = true; flags->l = true;}
 				else if (argv[index][position] == 'd') flags->d = true;
-				else if (argv[index][position] == 'u') flags->u = true;  //bonus acl
-				else if (argv[index][position] == 'e') flags->e = true;  //bonus acl
-				else if (argv[index][position] == '@') flags->at = true;  //bonus acl
-				else if (argv[index][position] == 'U') flags->U = true;
+				else if (argv[index][position] == 'u') flags->u = true;  //✅
+				else if (argv[index][position] == 'e') flags->e = true;  //✅
+				else if (argv[index][position] == '@') flags->at = true; //✅
+				else if (argv[index][position] == 'U') flags->U = true;  //✅
 				else if (argv[index][position] == 'f') {flags->f = true; flags->U = true; flags->a = true;}
 				else if (argv[index][position] == '1') flags->one = true;
 				else {

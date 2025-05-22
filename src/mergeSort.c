@@ -2,12 +2,32 @@
 #include "../includes/sort.h"
 #include "../includes/types.h"
 
-int	(*get_cmp_func(t_flags *flags))(t_fileData *, t_fileData *) {
+int	(*get_cmp_func_old(t_flags *flags))(t_fileData *, t_fileData *) {
 	if (flags->t && !flags->r){
 		return compare_by_time;}
 	else if (flags->t && flags->r)
 		return compare_by_time_reverse;
+	else if (flags->t && flags->u &&!flags->r) // ajout
+		return compare_by_atime;
+	else if (flags->t && flags->u &&flags->r) // ajout
+	
+		return compare_by_atime_reverse;
 	else if (!flags->t && !flags->r)
+		return compare_by_fileName;
+	else
+		return compare_by_fileName_reverse;
+}
+
+int (*get_cmp_func(t_flags *flags))(t_fileData *, t_fileData *) {
+	if (flags->t && flags->u && !flags->r)
+		return compare_by_atime;
+	else if (flags->t && flags->u && flags->r)
+		return compare_by_atime_reverse;
+	else if (flags->t && !flags->r)
+		return compare_by_time;
+	else if (flags->t && flags->r)
+		return compare_by_time_reverse;
+	else if (!flags->r)
 		return compare_by_fileName;
 	else
 		return compare_by_fileName_reverse;
@@ -31,6 +51,17 @@ int compare_by_time(t_fileData *a, t_fileData *b) {
 	return ft_strcmp(a->fileName, b->fileName);
 }
 
+int compare_by_atime(t_fileData *a, t_fileData *b) {
+	if (a->meta.st_atimes > b->meta.st_atimes)
+		return -1;
+	else if (a->meta.st_atimes < b->meta.st_atimes)
+		return 1;
+	if (a->meta.st_atime_nsec > b->meta.st_atime_nsec)
+		return -1;
+	else if (a->meta.st_atime_nsec < b->meta.st_atime_nsec)
+		return 1;
+	return ft_strcmp(a->fileName, b->fileName);
+}
 
 int compare_by_fileName_reverse(t_fileData *a, t_fileData *b) {
 	return ft_strcmp(b->fileName, a->fileName);
@@ -45,6 +76,18 @@ int compare_by_time_reverse(t_fileData *a, t_fileData *b) {
 	if (a->meta.st_mtime_nsec < b->meta.st_mtime_nsec)
 		return -1;
 	else if (a->meta.st_mtime_nsec > b->meta.st_mtime_nsec)
+		return 1;
+	return ft_strcmp(a->fileName, b->fileName);
+}
+
+int compare_by_atime_reverse(t_fileData *a, t_fileData *b) {
+	if (a->meta.st_atimes < b->meta.st_atimes)
+		return -1;
+	else if (a->meta.st_atimes > b->meta.st_atimes)
+		return 1;
+	if (a->meta.st_atime_nsec < b->meta.st_atime_nsec)
+		return -1;
+	else if (a->meta.st_atime_nsec > b->meta.st_atime_nsec)
 		return 1;
 	return ft_strcmp(a->fileName, b->fileName);
 }
