@@ -165,44 +165,7 @@ void process_argument_files(
 }
 
 
-/* void	process_argument_files_old(t_dyn *files,t_stack **directories_to_process, t_stack **fileList, t_flags *flag, t_exit_status *exit_status, time_t now, t_dynamic_format *dyn_format){
-	size_t		result;
-	while (*fileList != NULL){
-		char    *file_path = pop(fileList);
-		t_fileData *file = malloc_fileData();
-		if (!file) {
-			perror("malloc");
-			set_exit_status(exit_status, 1, strerror(errno));
-			continue;
-		}
-		
-		file->argument = true;
-		file->fileName = ft_strdup(file_path);
-		
-		file->absolutePath = ft_strdup(file_path);
-		get_fileInfo(file_path, file, flag,&files->total_size, exit_status, now, dyn_format );
-		update_dynamic_format(file, dyn_format);
-		if ((result = ft_strlen(file->fileName)) > dyn_format->max_name_width) {
-			dyn_format->max_name_width = result;
-		}
-		if ((result = ft_strlen(file->owner)) > dyn_format->max_owner_width) {
-			dyn_format->max_owner_width = result;
-		}
-		if ((result = ft_strlen(file->group)) > dyn_format->max_group_width) {
-			dyn_format->max_group_width = result;
-		}
-		if ((result = ft_intlen(file->fileSize)) > dyn_format->max_size_width) {
-			dyn_format->max_size_width = result;
-		}
 
-		if (file->fileType == 'd'  && !flag->d) {
-			push(directories_to_process, file->absolutePath);
-		} else {
-			append(files, file);
-		}
-		free(file_path);
-	}
-} */
 
 void process_directory(const char *dir, t_dyn *files, t_flags *flags, t_stack **directories_to_process, bool first_dir, t_exit_status *exit_status, time_t now, t_dynamic_format *dyn_format) {
 	bool an_error = list_directory_helper(dir, files, flags, directories_to_process, exit_status,  now, dyn_format);
@@ -212,72 +175,7 @@ void process_directory(const char *dir, t_dyn *files, t_flags *flags, t_stack **
 	display_sorted_files(an_error, files, flags, true, dyn_format);
 }
 
-/* bool    list_directory_helper_old(const char *path, t_dyn *files, t_flags *flags, t_stack **directories_to_process, t_exit_status *exit_status, time_t now, t_dynamic_format *dyn_format) {
-	bool status;
 
-	DIR *dir = opendir(path);
-	if (!validate_directory(path, dir))
-		return true;
-
-	if (!dir)
-	{
-		return handle_dir_open_error(path);
-	}
-
-	t_dyn subdirs;
-	init_dyn(&subdirs); 	
-	struct dirent *entry;
-
-	while (1){
-		errno = 0;
-		entry = readdir(dir);
-    		if (!entry){
-        		break;
-		}
-
-		if (!flags->a && (ft_strcmp(entry->d_name, "..") == 0 || entry->d_name[0] == '.')) { continue;}
-
-		t_fileData *file = create_fileData(path, entry, flags, &files->total_size, exit_status, now, dyn_format);
-		if (!file){
-			if (errno)
-        		perror("create_fileData");
-				else
-			ft_printf_fd(2, "Error: create_fileData failed unexpectedly\n");
-			closedir(dir);
-			free_dyn(files);
-			status = false;
-			return status;
-		}
-
-		
-		if (flags->bigR && file->fileType == 'd' && ft_strcmp(entry->d_name, "..") != 0 && ft_strcmp(entry->d_name, ".") != 0)
-		{
-			status = handle_subdir(&subdirs, file); 
-		}
-		append(files, file);
-
-		
-	}
-	
-	if (errno != 0) {
-		ft_printf_fd(2, "ft_ls: %s  ", path);
-		perror("");
-	}
-
-	closedir(dir);
-
-	if (!flags->U){
-		int (*cmp)(t_fileData *, t_fileData *) = get_cmp_func(flags);
-		mergeSort_iterative(subdirs.list, subdirs.length, cmp);
-	}
-
-	for (int i = subdirs.length - 1; i >= 0; i--) {
-		clean_path(subdirs.list[i]->absolutePath);
-		push(directories_to_process,  subdirs.list[i]->absolutePath);
-	}
-	free_dyn(&subdirs);
-	return false;
-} */
 
 bool list_directory_helper(
 	const char *path, t_dyn *files, t_flags *flags,
@@ -353,7 +251,7 @@ bool	handle_subdir(t_dyn *subdirs, t_fileData *file) {
 	subdir->meta.st_mtimes = file->meta.st_mtimes;
 	subdir->meta.st_atimes = file->meta.st_atimes;
 	subdir->meta.st_mtime_nsec = file->meta.st_mtime_nsec;
-	subdir->meta.st_atime_nsec = file->meta.st_atime_nsec;//
+	subdir->meta.st_atime_nsec = file->meta.st_atime_nsec;
 	subdir->meta.st_ino = file->meta.st_ino;
 	append(subdirs, subdir);
 	return true;

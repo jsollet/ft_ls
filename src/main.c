@@ -110,7 +110,7 @@ int main(int argc, char *argv[]) {
 	
 	
 
-	for (int i = 1; i < double_dash_position; i++){
+/* 	for (int i = 1; i < double_dash_position; i++){
 		if (argv[i][0] == '-'){continue;}
 
 		path_was_given = true;
@@ -134,8 +134,22 @@ int main(int argc, char *argv[]) {
 				has_valid_input = true;
 			}
 		}
-	}
+	} */
 	
+	for (int i = 1; i < argc; i++) {
+		if (i < double_dash_position && argv[i][0] == '-') continue;
+		if (i == double_dash_position) continue;
+
+		if (flags.d) {
+			push(&raw_argument, argv[i]);
+			has_valid_input = true;
+		} else {
+			if (process_path(&directories, &files_argument, argv[i], &exit_status)) {
+				has_valid_input = true;
+			}
+		}
+	}
+
 	// Aucun chemin fourni → on ajoute "." par défaut
 	if (!path_was_given) {
 		process_path(&directories, &files_argument, ".", &exit_status);

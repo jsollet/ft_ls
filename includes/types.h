@@ -26,6 +26,9 @@
 #define DISPLAY_FORMAT_INACCESSIBLE "%-10s%c %3s %-*s %-*s %*s %-10s %-10s\n"
 #define DISPLAY_FORMAT_INACCESSIBLE_G "%-10s%c %3s %-*s %*s %-10s %-10s\n"
 
+#ifndef PATH_MAX
+#define PATH_MAX 4096
+#endif
 
 typedef struct s_stack
 {

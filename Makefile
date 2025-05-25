@@ -17,7 +17,7 @@ RM = rm -f
 MKDIR = mkdir -p
 CC = gcc
 
-CFLAGS = -g  -Wall -Wextra -Werror -I$(INCDIR) -O3 -fsanitize=address
+CFLAGS = -g  -Wall -Wextra -Werror -I$(INCDIR) -O3 # -fsanitize=address
 LDFLAGS =
 
 #selection OS
