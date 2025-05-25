@@ -20,8 +20,14 @@
 #define DISPLAY_FORMAT_LONG_G "%-10s%c %3ld %-*s %*lld %-10s %-10s"
 #define DISPLAY_FORMAT_LONG_G_COLOR "%-10s%c %3ld %-*s %*lld %-10s %s%-10s%s"
 
-#define DISPLAY_FORMAT_LONG "%-10s%c %3ld %-*s %-*s %*lld %-10s %-10s"
+#define DISPLAY_FORMAT_LONG "%-10s%c %3ld %-*s %-*s %*lld %-10s %-10s" //-10s
 #define DISPLAY_FORMAT_LONG_COLOR "%-10s%c %3ld %-*s %-*s %*lld %-10s %s%-10s%s"
+
+#define DISPLAY_FORMAT_LONG_G_LINK "%-10s%c %3ld %-*s %*lld %-10s %-*s -> %s"
+#define DISPLAY_FORMAT_LONG_G_LINK_COLOR "%-10s%c %3ld %-*s %*lld %-10s %s%-*s -> %s%s"
+
+#define DISPLAY_FORMAT_LONG_LINK "%-10s%c %3ld %-*s %-*s %*lld %-10s %-*s -> %s" //-10s
+#define DISPLAY_FORMAT_LONG_LINK_COLOR "%-10s%c %3ld %-*s %-*s %*lld %-10s %s%-*s -> %s%s"
 
 #define DISPLAY_FORMAT_INACCESSIBLE "%-10s%c %3s %-*s %-*s %*s %-10s %-10s\n"
 #define DISPLAY_FORMAT_INACCESSIBLE_G "%-10s%c %3s %-*s %*s %-10s %-10s\n"

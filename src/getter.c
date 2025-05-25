@@ -219,34 +219,41 @@ void fill_symlink_target(const char *path, t_fileData *file, t_exit_status *exit
 	}		
 }
 
-void    get_fileInfo(const char* path, t_fileData *file,  t_flags *flag,long *total_size, t_exit_status *exit_status, time_t now,  t_dynamic_format *dyn_format){
+void    get_fileInfo(const char* path, t_fileData *file,long *total_size,t_context *ctx){
 	
 	struct stat sfile;
 	size_t result;
 	char	flag_label;
-	if (flag->u) flag_label = 'u';
+	if (ctx->flags->u) flag_label = 'u';
 	else flag_label = 't';
 
-	if (!fill_stat_data(path, &sfile, file, exit_status))
+	if (!fill_stat_data(path, &sfile, file, ctx->exit_status))
 		return;
 	fill_basic_info(file, &sfile, total_size);
-	fill_user_group_info(file, &sfile, exit_status);
+	fill_user_group_info(file, &sfile, ctx->exit_status);
 	fill_permissions(file, &sfile);
-	if (flag->acl || flag->attr || flag->extended || flag->e || flag->at){
-		fill_extended_attrs(file, flag, exit_status);
+	if (ctx->flags->acl || ctx->flags->attr || ctx->flags->extended || ctx->flags->e || ctx->flags->at){
+		fill_extended_attrs(file, ctx->flags, ctx->exit_status);
 	}
-	fill_last_modified(file, &sfile, flag_label, now);
-	fill_symlink_target(path, file, exit_status);
-	if ((result = ft_strlen(file->fileName)) > dyn_format->max_name_width) {
-		dyn_format->max_name_width = result;
+	fill_last_modified(file, &sfile, flag_label, ctx->now);
+	fill_symlink_target(path, file, ctx->exit_status);
+	//printf("taille pour %s | %ld\n", file->fileName, ft_strlen(file->fileName));
+	
+	if ((result = ft_strlen(file->ownership.owner)) > ctx->dyn_format->max_owner_width) {
+		ctx->dyn_format->max_owner_width = result;
 	}
-	if ((result = ft_strlen(file->ownership.owner)) > dyn_format->max_owner_width) {
-		dyn_format->max_owner_width = result;
+	if ((result = ft_strlen(file->ownership.group)) > ctx->dyn_format->max_group_width) {
+		ctx->dyn_format->max_group_width = result;
 	}
-	if ((result = ft_strlen(file->ownership.group)) > dyn_format->max_group_width) {
-		dyn_format->max_group_width = result;
+	if ((result = ft_intlen(file->meta.fileSize)) > ctx->dyn_format->max_size_width) {
+		ctx->dyn_format->max_size_width = result;
 	}
-	if ((result = ft_intlen(file->meta.fileSize)) > dyn_format->max_size_width) {
-		dyn_format->max_size_width = result;
+	if (ctx->flags->d){
+		ctx->dyn_format->max_name_width = ft_strlen(file->fileName);
+		return;
+	} else 
+	if ((result = ft_strlen(file->fileName)) > ctx->dyn_format->max_name_width) {
+		//printf("taille pour %s | %ld\n", file->fileName, result);
+		ctx->dyn_format->max_name_width = result;
 	}
 } 
