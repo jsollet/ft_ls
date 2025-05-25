@@ -114,6 +114,7 @@ int main(int argc, char *argv[]) {
 		if (i < double_dash_position && argv[i][0] == '-') continue;
 		if (i == double_dash_position) continue;
 
+		path_was_given = true;
 		if (flags.d) {
 			push(&raw_argument, argv[i]);
 			has_valid_input = true;

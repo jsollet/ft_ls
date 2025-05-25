@@ -30,6 +30,12 @@
 #define PATH_MAX 4096
 #endif
 
+typedef struct s_exit_status {
+    int code;
+    char *message;
+} t_exit_status;
+
+
 typedef struct s_stack
 {
 	size_t count;
@@ -124,6 +130,13 @@ typedef struct s_fileData
 	t_fileXattr     xattr;
 
 }   t_fileData;
+
+typedef struct s_context {
+	t_flags           *flags;
+	t_exit_status     *exit_status;
+	time_t            now;
+	t_dynamic_format  *dyn_format;
+} t_context;
 
 typedef struct s_term
 {
