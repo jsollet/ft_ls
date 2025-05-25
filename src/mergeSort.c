@@ -2,21 +2,6 @@
 #include "../includes/sort.h"
 #include "../includes/types.h"
 
-int	(*get_cmp_func_old(t_flags *flags))(t_fileData *, t_fileData *) {
-	if (flags->t && !flags->r){
-		return compare_by_time;}
-	else if (flags->t && flags->r)
-		return compare_by_time_reverse;
-	else if (flags->t && flags->u &&!flags->r) // ajout
-		return compare_by_atime;
-	else if (flags->t && flags->u &&flags->r) // ajout
-	
-		return compare_by_atime_reverse;
-	else if (!flags->t && !flags->r)
-		return compare_by_fileName;
-	else
-		return compare_by_fileName_reverse;
-}
 
 int (*get_cmp_func(t_flags *flags))(t_fileData *, t_fileData *) {
 	if (flags->t && flags->u && !flags->r)

@@ -3,7 +3,7 @@
 
 
 intmax_t get_int_arg(va_list args, t_printf_length length) {
-    if (length == ll) return va_arg(args, long long); // a voir
+    if (length == ll) return va_arg(args, long long);
     if (length == l) return va_arg(args, long);
     if (length == hh) return (char)va_arg(args, int); 
     if (length == h) return (short)va_arg(args, int);
@@ -28,7 +28,7 @@ long double get_float_arg(va_list args, t_printf_length length) {
     if (length == L) {
         return va_arg(args, long double);
     }
-    return (long double)va_arg(args, double);  // %f → promote float to double
+    return (long double)va_arg(args, double);
 }
 
 void handle_sign(intmax_t value, t_conversion *conv, t_buffer *buf){

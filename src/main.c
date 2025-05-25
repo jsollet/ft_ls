@@ -71,7 +71,7 @@ bool    parse_flags(int argc, char *argv[], t_flags *flags){
 				else {
 					ft_printf_fd(2,"ft_ls: invalid option -- '%c'\n", argv[index][position]);
 					ft_printf_fd(2, "usage: ./ft_ls [-@RUalrtufgdeU1] [--color --acl --attr --extended][file ...]\n");
-					return false; //voir pour les erreur et leurs gestion
+					return false;
 				}
 				position++;
 			}
@@ -92,7 +92,10 @@ bool    parse_flags(int argc, char *argv[], t_flags *flags){
 
 int main(int argc, char *argv[]) {
 	// Forcer la locale "C" pour éviter toute gestion locale spéciale
-    setenv("LC_ALL", "C", 1);
+    t_stack *directories = NULL;
+	t_stack *files_argument = NULL;
+	t_stack *raw_argument = NULL;
+	setenv("LC_ALL", "C", 1);
 	bool has_valid_input = false;
 	bool path_was_given = false;
 
@@ -104,38 +107,9 @@ int main(int argc, char *argv[]) {
 		return exit_status.code;
 	}
 
-	t_stack *directories = NULL;
-	t_stack *files_argument = NULL;
-	t_stack *raw_argument = NULL; // pour flag -d 
 	
 	
 
-/* 	for (int i = 1; i < double_dash_position; i++){
-		if (argv[i][0] == '-'){continue;}
-
-		path_was_given = true;
-		if (flags.d){
-			push(&raw_argument, argv[i]),
-			has_valid_input = true;
-		}
-		else {
-			if (process_path(&directories, &files_argument, argv[i], &exit_status)) {
-				has_valid_input = true;
-			}
-		}	
-	}
-
-	for (int i = double_dash_position + 1; i < argc; i++){
-		if (flags.d){
-			push(&raw_argument, argv[i]),
-			has_valid_input = true;
-		} else {
-			if (process_path(&directories, &files_argument, argv[i], &exit_status)) {
-				has_valid_input = true;
-			}
-		}
-	} */
-	
 	for (int i = 1; i < argc; i++) {
 		if (i < double_dash_position && argv[i][0] == '-') continue;
 		if (i == double_dash_position) continue;
@@ -156,7 +130,7 @@ int main(int argc, char *argv[]) {
 		has_valid_input = true;
 	}
 
-	if (!has_valid_input) {// ajout
+	if (!has_valid_input) {
 		return exit_status.code;
 	}
 	if (flags.d){

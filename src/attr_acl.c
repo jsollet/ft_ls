@@ -20,24 +20,6 @@ ssize_t	get_xattr_size(t_fileData *file, char *buffer, ssize_t size){
 	return size;
 }
 
-void	fill_xattr_structure_1(t_fileData *file, char *buffer, ssize_t size){
-	int	j = 0;
-	int	i = 0;
-	
-	while (i < size){
-
-		char *name = &buffer[i];
-		file->xattr.xattrs[j].name = ft_strdup(name);
-		#ifdef __APPLE__
-		file->xattr.xattrs[j].size = getxattr(file->absolutePath, name, NULL, 0, 0, XATTR_NOFOLLOW);
-		#else
-		file->xattr.xattrs[j].size = getxattr(file->absolutePath, name, NULL, 0);
-		#endif
-		i += ft_strlen(name) + 1;
-		j++;
-	}
-	
-}
 
 void fill_xattr_structure(t_fileData *file, char *buffer, ssize_t size) {
     int j = 0;
@@ -47,7 +29,7 @@ void fill_xattr_structure(t_fileData *file, char *buffer, ssize_t size) {
         char *name = &buffer[i];
         ssize_t value_size;
 
-	// ⚠️ Filtrage des attributs ACL système (non affichés par `ls -l@`)
+	
         if (ft_strcmp(name, "system.posix_acl_access") == 0 ||
             ft_strcmp(name, "system.posix_acl_default") == 0) {
             i += ft_strlen(name) + 1;
@@ -91,7 +73,7 @@ void fill_xattr_structure(t_fileData *file, char *buffer, ssize_t size) {
         i += ft_strlen(name) + 1;
         j++;
     }
-    file->xattr.xattr_count = j;//
+    file->xattr.xattr_count = j;
 }
 
 
@@ -170,31 +152,6 @@ char has_xattr(const char *path, t_exit_status *exit_status)
     #endif
 }
 
-
-char	has_acl_old(const char *path, char **text, t_exit_status *exit_status)
-{
-	acl_t acl = NULL;
-	#ifdef __APPLE__
-		acl = acl_get_file(path, ACL_TYPE_EXTENDED);
-		if (acl == NULL) {
-			set_exit_status(exit_status, 1, strerror(errno));
-			return ' ';
-		}
-	#else
-		acl = acl_get_file(path, ACL_TYPE_ACCESS);
-		if (acl == NULL) {
-			set_exit_status(exit_status, 1, strerror(errno));
-			return ' ';
-		}
-	#endif
-		if (acl) {
-			*text = acl_to_text(acl, NULL);
-			acl_free(acl);
-			return '+';
-		}
-		return ' ';
-}
-
 char has_acl(const char *path, char **text, t_exit_status *exit_status)
 {
 	acl_t acl = NULL;
@@ -214,11 +171,9 @@ char has_acl(const char *path, char **text, t_exit_status *exit_status)
 			return ' ';
 		}
 		mode_t  equiv;
-		int res = acl_equiv_mode(acl, &equiv);
-		//printf("res = %d equiv = %d\n", res, equiv);
+		int res = acl_equiv_mode(acl, &equiv);		
+		
 		if (res == 1) {
-			// vraie ACL étendue
-			//printf("vrai acl\n");
 			*text = acl_to_text(acl, NULL);
 			acl_free(acl);
 			return (*text != NULL) ? '+' : ' ';
@@ -228,24 +183,6 @@ char has_acl(const char *path, char **text, t_exit_status *exit_status)
 	#endif
 }
 
-char has_acl_pb(const char *path, char **text, t_exit_status *exit_status)
-{
-	acl_t acl = NULL;
-	#ifdef __APPLE__
-		acl = acl_get_file(path, ACL_TYPE_EXTENDED);
-	#else
-		acl = acl_get_file(path, ACL_TYPE_ACCESS);
-	#endif
-	if (acl == NULL) {
-		set_exit_status(exit_status, 1, strerror(errno));
-		return ' ';
-	}
-
-	*text = acl_to_text(acl, NULL);
-	acl_free(acl);
-
-	return (*text != NULL) ? '+' : ' ';
-}
 
 
 char *check_and_free(char **tokens, char *line) {

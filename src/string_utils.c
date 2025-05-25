@@ -81,7 +81,7 @@ char* find_text_block(const char *str, size_t *start, t_format_block *position) 
     size_t len;
 
     if (next_percent == -1) {
-        len = ft_strlen(str + *start); //ok
+        len = ft_strlen(str + *start);
     } else {
         len = next_percent - *start;
     }
@@ -89,7 +89,7 @@ char* find_text_block(const char *str, size_t *start, t_format_block *position) 
     if (len == 0)
         return NULL;
 
-    char *text_block = ft_substr(str, *start, len); // ok
+    char *text_block = ft_substr(str, *start, len);
     if (!text_block)
         return NULL;
     

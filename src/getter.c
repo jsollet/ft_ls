@@ -173,7 +173,7 @@ void fill_extended_attrs(t_fileData *file, t_flags *flag, t_exit_status *exit_st
 	char *tmp = NULL;
 	if (flag->acl || flag->extended || flag->e) {
 		file->xattr.has_acl = has_acl(file->absolutePath, &tmp, exit_status);
-		if (file->xattr.has_acl == '?') {file->xattr.has_acl = ' ';}//
+		if (file->xattr.has_acl == '?') {file->xattr.has_acl = ' ';}
 		if (file->xattr.has_acl == '+')
 		{
 			#ifdef __APPLE__

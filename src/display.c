@@ -61,11 +61,74 @@ static void display_directory_total(bool an_error,t_dyn *files, bool is_director
 		}
 }
 
+static char get_display_attribute(t_fileData *file) {
+    char attribute = file->xattr.has_xattr;
+    if (attribute == ' ') attribute = file->xattr.has_acl;
+    if (attribute == '0') attribute = ' ';
+    return attribute;
+}
+
+static void display_long_file_color(char attribute,t_fileData *files, t_flags *flags, t_dynamic_format *dyn_format, t_color_rule *color_rules){
+	char *reset = RESET_COLOR;
+	char *color = reset;
+	color = select_color_new(files, color_rules);
+	if (!flags->g){
+		ft_printf1(DISPLAY_FORMAT_LONG_COLOR ,
+		files->meta.permission, attribute, 
+		files->meta.linkNumber,  
+		(int)dyn_format->max_owner_width,files->ownership.owner,
+		(int)dyn_format->max_group_width,files->ownership.group,
+		(int)dyn_format->max_size_width,files->meta.fileSize, 
+		files->meta.lastModified, color,files->fileName, reset);
+	} else {
+		ft_printf1(DISPLAY_FORMAT_LONG_G_COLOR,
+			files->meta.permission, attribute, files->meta.linkNumber,
+			(int)dyn_format->max_group_width,files->ownership.group,
+			(int)dyn_format->max_size_width,files->meta.fileSize,   
+			files->meta.lastModified,color,files->fileName, reset);
+	}
+}
+
+static void display_long_file( char attribute,t_fileData *files, t_flags *flags, t_dynamic_format *dyn_format){
+	if (!flags->g){
+		ft_printf1(DISPLAY_FORMAT_LONG,
+			files->meta.permission, attribute, files->meta.linkNumber,
+			(int)dyn_format->max_owner_width,files->ownership.owner, 
+			(int)dyn_format->max_group_width,files->ownership.group,
+			(int)dyn_format->max_size_width,files->meta.fileSize, 
+			files->meta.lastModified, files->fileName);
+	} else{			
+		ft_printf1(DISPLAY_FORMAT_LONG_G,
+			files->meta.permission, attribute, files->meta.linkNumber,
+			(int)dyn_format->max_group_width,files->ownership.group,
+			(int)dyn_format->max_size_width,files->meta.fileSize, 
+			files->meta.lastModified, files->fileName);
+	}
+}
+
+static void display_link(t_fileData *files){
+	if (files->meta.fileType == 'l' && files->link_target_buf[0] != '\0') {
+		ft_printf1(" -> %s", files->link_target_buf);
+	}
+}
+
+static void display_acl(t_fileData *files, t_flags *flags){
+	if (flags->e && files->xattr.acl_text){
+		ft_printf1("\n%s", files->xattr.acl_text);
+	}
+}
+
+static void display_xattrs(t_fileData *files,  t_flags *flags) {
+	if (flags->at && files->xattr.has_xattr== '@'){
+    	for (int j = 0; j < files->xattr.xattr_count; j++) {
+       		ft_printf1("\n\t%s\t%zd\t", files->xattr.xattrs[j].name, files->xattr.xattrs[j].size);
+        	print_xattr_value(files->xattr.xattrs[j].value, files->xattr.xattrs[j].size);
+    	}
+	}
+}
 
 void display_sorted_files(bool an_error,t_dyn *files, t_flags *flags, bool is_directory, t_dynamic_format *dyn_format) {
 	char attribute;
-	char *reset = RESET_COLOR;
-	char *color = reset;
 	t_color_rule color_rules[] = {
 		{'d', is_sticky, BACK_CYAN_COLOR},
 		{'-', is_setuid, BACK_RED_COLOR},
@@ -86,60 +149,19 @@ void display_sorted_files(bool an_error,t_dyn *files, t_flags *flags, bool is_di
 		display_directory_total(an_error, files, is_directory);
 		
 		for (int i = 0; i < files->length; i++) {
-			attribute = files->list[i]->xattr.has_xattr;
-			if (attribute == ' ') {attribute = files->list[i]->xattr.has_acl;}
-			if (attribute == '0') {attribute = ' ';}
-			//printf("File: %s xattr: |%c| acl: |%c|\n", files->list[i]->absolutePath, files->list[i]->xattr.has_xattr, files->list[i]->xattr.has_acl);
-						
+			attribute = get_display_attribute(files->list[i]);		
+			
 			if (display_inacessible_file(i, files, flags, dyn_format)){continue;}
-
+			
 			if (flags->color){
-				color = select_color_new(files->list[i], color_rules);
-				if (!flags->g)
-					ft_printf1(DISPLAY_FORMAT_LONG_COLOR ,
-						files->list[i]->meta.permission, attribute, 
-						files->list[i]->meta.linkNumber,  
-						(int)dyn_format->max_owner_width,files->list[i]->ownership.owner,
-						(int)dyn_format->max_group_width,files->list[i]->ownership.group,
-						(int)dyn_format->max_size_width,files->list[i]->meta.fileSize, 
-						files->list[i]->meta.lastModified, color,files->list[i]->fileName, reset);
-				else
-				ft_printf1(DISPLAY_FORMAT_LONG_G_COLOR,
-					files->list[i]->meta.permission, attribute, files->list[i]->meta.linkNumber,
-					(int)dyn_format->max_group_width,files->list[i]->ownership.group,
-					(int)dyn_format->max_size_width,files->list[i]->meta.fileSize,   
-					files->list[i]->meta.lastModified,color,files->list[i]->fileName, reset);
-				
+				display_long_file_color(attribute, files->list[i], flags, dyn_format, color_rules);	
 			} else {
-				if (!flags->g){
-					ft_printf1(DISPLAY_FORMAT_LONG,
-					files->list[i]->meta.permission, attribute, files->list[i]->meta.linkNumber,
-					(int)dyn_format->max_owner_width,files->list[i]->ownership.owner, 
-					(int)dyn_format->max_group_width,files->list[i]->ownership.group,
-					(int)dyn_format->max_size_width,files->list[i]->meta.fileSize, 
-				  	files->list[i]->meta.lastModified, files->list[i]->fileName);
-				}
-				else{			
-				ft_printf1(DISPLAY_FORMAT_LONG_G,
-					files->list[i]->meta.permission, attribute, files->list[i]->meta.linkNumber,
-					(int)dyn_format->max_group_width,files->list[i]->ownership.group,
-					(int)dyn_format->max_size_width,files->list[i]->meta.fileSize, 
-				  	files->list[i]->meta.lastModified, files->list[i]->fileName);
-				}
+				display_long_file(attribute, files->list[i], flags, dyn_format);
 			}
 			
-			if (files->list[i]->meta.fileType == 'l' && files->list[i]->link_target_buf[0] != '\0') {
-				ft_printf1(" -> %s", files->list[i]->link_target_buf);
-			}
-			if (flags->e && files->list[i]->xattr.acl_text){
-				ft_printf1("\n%s", files->list[i]->xattr.acl_text);
-			}
-			if (flags->at && files->list[i]->xattr.has_xattr== '@'){
-				for (int j=0;j < files->list[i]->xattr.xattr_count; j++){
-					ft_printf1("\n\t%s\t%zd\t", files->list[i]->xattr.xattrs[j].name, files->list[i]->xattr.xattrs[j].size);
-					print_xattr_value(files->list[i]->xattr.xattrs[j].value,files->list[i]->xattr.xattrs[j].size );
-				}
-			}
+			display_link(files->list[i]);
+			display_acl(files->list[i], flags);
+			display_xattrs(files->list[i], flags);
 			ft_printf1("\n");
 		}
 	} else {
