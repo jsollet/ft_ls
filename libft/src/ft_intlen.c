@@ -2,7 +2,7 @@
 
 size_t	ft_intlen(long long int n)
 {
-	int		result;
+	long long int		result;
 	size_t	count;
 
 	result = n;
