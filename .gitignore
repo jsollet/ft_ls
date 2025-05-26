@@ -6,6 +6,5 @@
 Dockerfile
 /old_stuff
 /test_env
-README.md
 *.profraw
 *.log

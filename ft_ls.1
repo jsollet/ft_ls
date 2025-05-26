@@ -1,0 +1,69 @@
+.TH FT_LS 1 "2025" "Jean-Marie Solletti" "Commande utilisateur"
+
+.SH NOM
+ft_ls \- Réimplémentation de la commande ls en C
+
+.SH SYNOPSIS
+.B ./ft_ls
+[\fIOPTIONS\fR] [\fIFICHIER...\fR]
+
+.SH DESCRIPTION
+Affiche la liste des fichiers et répertoires. Réimplémentation de la commande \fBls\fR avec certaines fonctionnalités GNU et des extensions spécifiques au projet.
+
+.SH OPTIONS STANDARD
+.TP
+.B -l
+Affichage long (détails fichiers)
+.TP
+.B -R
+Parcours récursif
+.TP
+.B -a
+Affiche les fichiers cachés
+.TP
+.B -t
+Trie par date de modification
+.TP
+.B -r
+Inverse l'ordre de tri
+.TP
+.B -u
+Trie par date d'accès (avec \fB-t\fR)
+.TP
+.B -f
+Pas de tri, équivaut à \fB-aU\fR
+.TP
+.B -g
+Affichage long sans l’utilisateur
+.TP
+.B -d
+N'affiche que les dossiers, sans les parcourir
+.TP
+.B -1
+Une entrée par ligne
+.TP
+.B -U
+Ordre physique du disque (inode)
+
+.SH OPTIONS SPÉCIFIQUES (BONUS)
+.TP
+.B -@
+Affiche les attributs étendus (xattr)
+.TP
+.B -e
+Affiche les ACL
+.TP
+.B --acl
+Affiche les ACL (équivalent à \fB-e\fR)
+.TP
+.B --attr
+Affiche uniquement les attributs étendus
+.TP
+.B --extended
+Affiche ACL et xattr
+.TP
+.B --color
+Affichage coloré partiel
+
+.SH AUTEUR
+Jean-Marie Solletti – 42 project – 2025

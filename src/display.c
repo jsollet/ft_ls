@@ -27,21 +27,21 @@ static void display_file_names(t_dyn *files, t_flags *flags, t_color_rule *color
 		list_directory_line(arr, color, files->length);
 }
 
-static bool display_inacessible_file(int i,t_dyn *files, t_flags *flags, t_dynamic_format *dyn_format){
+static bool display_inacessible_file(int i,t_dyn *files,t_context *ctx){
 	if (!files->list[i]->valid){
-		if (!flags->g){
+		if (!ctx->flags->g){
 			ft_printf1(DISPLAY_FORMAT_INACCESSIBLE, 
 				files->list[i]->meta.permission, ' ', "?", 
-				(int)dyn_format->max_owner_width,files->list[i]->ownership.owner,
-				(int)dyn_format->max_group_width,files->list[i]->ownership.group,
-				(int)dyn_format->max_size_width,"?",
+				(int)ctx->dyn_format->max_owner_width,files->list[i]->ownership.owner,
+				(int)ctx->dyn_format->max_group_width,files->list[i]->ownership.group,
+				(int)ctx->dyn_format->max_size_width,"?",
 				files->list[i]->meta.lastModified,
 				files->list[i]->fileName);
 		} else {
 			ft_printf1(DISPLAY_FORMAT_INACCESSIBLE_G, 
 				files->list[i]->meta.permission, ' ', "?", 
-				(int)dyn_format->max_group_width,files->list[i]->ownership.group,
-				(int)dyn_format->max_size_width,"?",
+				(int)ctx->dyn_format->max_group_width,files->list[i]->ownership.group,
+				(int)ctx->dyn_format->max_size_width,"?",
 				files->list[i]->meta.lastModified,
 				files->list[i]->fileName);
 		}
@@ -68,94 +68,89 @@ static char get_display_attribute(t_fileData *file) {
     return attribute;
 }
 
-static void display_long_file_color(char attribute,t_fileData *files, t_flags *flags, t_dynamic_format *dyn_format, t_color_rule *color_rules){
+static void display_long_file_color(char attribute,t_fileData *files, t_context *ctx, t_color_rule *color_rules){
 	char *reset = RESET_COLOR;
 	char *color = reset;
 	color = select_color_new(files, color_rules);
-	if (!flags->g){
-		ft_printf1(DISPLAY_FORMAT_LONG_COLOR ,
+	if (!ctx->flags->g){
+		ft_printf1(DISPLAY_FORMAT_LONG_COLOR,
 		files->meta.permission, attribute, 
 		files->meta.linkNumber,  
-		(int)dyn_format->max_owner_width,files->ownership.owner,
-		(int)dyn_format->max_group_width,files->ownership.group,
-		(int)dyn_format->max_size_width,files->meta.fileSize, 
+		(int)ctx->dyn_format->max_owner_width,files->ownership.owner,
+		(int)ctx->dyn_format->max_group_width,files->ownership.group,
+		(int)ctx->dyn_format->max_size_width,files->meta.fileSize, 
 		files->meta.lastModified, color,files->fileName, reset);
 	} else {
 		ft_printf1(DISPLAY_FORMAT_LONG_G_COLOR,
 			files->meta.permission, attribute, files->meta.linkNumber,
-			(int)dyn_format->max_group_width,files->ownership.group,
-			(int)dyn_format->max_size_width,files->meta.fileSize,   
+			(int)ctx->dyn_format->max_group_width,files->ownership.group,
+			(int)ctx->dyn_format->max_size_width,files->meta.fileSize,   
 			files->meta.lastModified,color,files->fileName, reset);
 	}
 }
 
-static void display_long_file_link_color(char attribute,t_fileData *files, t_flags *flags, t_dynamic_format *dyn_format, t_color_rule *color_rules){
+static void display_long_file_link_color(char attribute,t_fileData *files, t_context *ctx, t_color_rule *color_rules){
 	char *reset = RESET_COLOR;
 	char *color = reset;
 	color = select_color_new(files, color_rules);
 	int	dyn_size =ft_strlen(files->fileName);
 
-	if (!flags->g){
+	if (!ctx->flags->g){
 		ft_printf1(DISPLAY_FORMAT_LONG_LINK_COLOR,
 		files->meta.permission, attribute, 
 		files->meta.linkNumber,  
-		(int)dyn_format->max_owner_width,files->ownership.owner,
-		(int)dyn_format->max_group_width,files->ownership.group,
-		(int)dyn_format->max_size_width,files->meta.fileSize, 
+		(int)ctx->dyn_format->max_owner_width,files->ownership.owner,
+		(int)ctx->dyn_format->max_group_width,files->ownership.group,
+		(int)ctx->dyn_format->max_size_width,files->meta.fileSize, 
 		files->meta.lastModified, color,dyn_size, files->fileName, files->link_target_buf, reset);
 	} else {
 		ft_printf1(DISPLAY_FORMAT_LONG_G_LINK_COLOR,
 			files->meta.permission, attribute, files->meta.linkNumber,
-			(int)dyn_format->max_group_width,files->ownership.group,
-			(int)dyn_format->max_size_width,files->meta.fileSize,   
+			(int)ctx->dyn_format->max_group_width,files->ownership.group,
+			(int)ctx->dyn_format->max_size_width,files->meta.fileSize,   
 			files->meta.lastModified,color,dyn_size, files->fileName,files->link_target_buf, reset);
 	}
 }
 
-static void display_long_file( char attribute,t_fileData *files, t_flags *flags, t_dynamic_format *dyn_format){
-	if (!flags->g){
+static void display_long_file( char attribute,t_fileData *files, t_context *ctx){
+	if (!ctx->flags->g){
 		ft_printf1(DISPLAY_FORMAT_LONG,
 			files->meta.permission, attribute, files->meta.linkNumber,
-			(int)dyn_format->max_owner_width,files->ownership.owner, 
-			(int)dyn_format->max_group_width,files->ownership.group,
-			(int)dyn_format->max_size_width,files->meta.fileSize, 
+			(int)ctx->dyn_format->max_owner_width,files->ownership.owner, 
+			(int)ctx->dyn_format->max_group_width,files->ownership.group,
+			(int)ctx->dyn_format->max_size_width,files->meta.fileSize, 
 			files->meta.lastModified,
 			files->fileName);
 	} else{			
 		ft_printf1(DISPLAY_FORMAT_LONG_G,
 			files->meta.permission, attribute, files->meta.linkNumber,
-			(int)dyn_format->max_group_width,files->ownership.group,
-			(int)dyn_format->max_size_width,files->meta.fileSize, 
+			(int)ctx->dyn_format->max_group_width,files->ownership.group,
+			(int)ctx->dyn_format->max_size_width,files->meta.fileSize, 
 			files->meta.lastModified, files->fileName);
 	}
 }
 
-static void display_long_file_link( char attribute,t_fileData *files, t_flags *flags, t_dynamic_format *dyn_format){
+static void display_long_file_link( char attribute,t_fileData *files, t_context *ctx){
 	int	dyn_size =ft_strlen(files->fileName);
 
-	if (!flags->g){
+	if (!ctx->flags->g){
 		ft_printf1(DISPLAY_FORMAT_LONG_LINK,
 			files->meta.permission, attribute, files->meta.linkNumber,
-			(int)dyn_format->max_owner_width,files->ownership.owner, 
-			(int)dyn_format->max_group_width,files->ownership.group,
-			(int)dyn_format->max_size_width,files->meta.fileSize, 
+			(int)ctx->dyn_format->max_owner_width,files->ownership.owner, 
+			(int)ctx->dyn_format->max_group_width,files->ownership.group,
+			(int)ctx->dyn_format->max_size_width,files->meta.fileSize, 
 			files->meta.lastModified,
 			dyn_size,files->fileName, files->link_target_buf);
 	} else{			
 		ft_printf1(DISPLAY_FORMAT_LONG_G_LINK,
 			files->meta.permission, attribute, files->meta.linkNumber,
-			(int)dyn_format->max_group_width,files->ownership.group,
-			(int)dyn_format->max_size_width,files->meta.fileSize, 
+			(int)ctx->dyn_format->max_group_width,files->ownership.group,
+			(int)ctx->dyn_format->max_size_width,files->meta.fileSize, 
 			files->meta.lastModified, 
 			dyn_size, files->fileName, files->link_target_buf);
 	}
 }
-/* 
-static void display_link(t_fileData *files){
-	if (files->meta.fileType == 'l' && files->link_target_buf[0] != '\0') {
-		ft_printf1(" -> %s", files->link_target_buf);
-	}
-} */
+
 
 static void display_acl(t_fileData *files, t_flags *flags){
 	if (flags->e && files->xattr.acl_text){
@@ -196,26 +191,25 @@ void display_sorted_files(bool an_error,t_dyn *files, bool is_directory, t_conte
 		for (int i = 0; i < files->length; i++) {
 			attribute = get_display_attribute(files->list[i]);		
 			
-			if (display_inacessible_file(i, files, ctx->flags, ctx->dyn_format)){continue;}
+			if (display_inacessible_file(i, files, ctx)){continue;}
 			
 			if (ctx->flags->color){
 				if (files->list[i]->meta.fileType == 'l' && files->list[i]->link_target_buf[0] != '\0'){
-					display_long_file_link_color(attribute, files->list[i], ctx->flags, ctx->dyn_format, color_rules);
+					display_long_file_link_color(attribute, files->list[i], ctx, color_rules);
 				} else {
-					display_long_file_color(attribute, files->list[i], ctx->flags, ctx->dyn_format, color_rules);
+					display_long_file_color(attribute, files->list[i], ctx, color_rules);
 				}
 				
 			} else {
 				if (files->list[i]->meta.fileType == 'l' && files->list[i]->link_target_buf[0] != '\0'){
-					display_long_file_link(attribute, files->list[i], ctx->flags, ctx->dyn_format);
+					display_long_file_link(attribute, files->list[i], ctx);
 				}
 				else {
-					display_long_file(attribute, files->list[i], ctx->flags, ctx->dyn_format);
+					display_long_file(attribute, files->list[i], ctx);
 				}
 				
 			}
 
-			//display_link(files->list[i]);
 			display_acl(files->list[i], ctx->flags);
 			display_xattrs(files->list[i], ctx->flags);
 			ft_printf1("\n");

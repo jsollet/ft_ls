@@ -82,7 +82,7 @@ static void process_single_file(char *file_path, t_dyn *files, t_stack **directo
 	file->fileName = ft_strdup(file_path);
 	file->absolutePath = ft_strdup(file_path);
 
-	get_fileInfo(file_path, file, &files->total_size, ctx/* ->flags, ctx->exit_status, ctx->now, ctx->dyn_format */);
+	get_fileInfo(file_path, file, &files->total_size, ctx);
 	update_dynamic_format(file, ctx->dyn_format);
 
 	if (file->meta.fileType == 'd' && !ctx->flags->d) {
@@ -120,7 +120,6 @@ static bool process_directory_entry(struct dirent *entry, const char *path, t_dy
 			ft_printf_fd(2, "Error: create_fileData failed unexpectedly\n");
 		return false;
 	}
-
 	if (ctx->flags->bigR && file->meta.fileType == 'd' &&
 		ft_strcmp(entry->d_name, ".") != 0 &&
 		ft_strcmp(entry->d_name, "..") != 0)
@@ -128,7 +127,6 @@ static bool process_directory_entry(struct dirent *entry, const char *path, t_dy
 		if (!handle_subdir(subdirs, file))
 			return false;
 	}
-
 	append(files, file);
 	return true;
 }
@@ -140,14 +138,7 @@ void    list_directory(t_flags *flags, t_stack **directories_to_process, t_stack
 	t_dynamic_format dyn_format = {0};
 	static bool first_dir = false;
 
-	/* typedef struct s_context {
-	t_flags           flags;
-	t_exit_status     exit_status;
-	time_t            now;
-	t_dynamic_format  dyn_format;
-	} t_context;	 */
 	t_context	context = {.flags = flags, .exit_status = exit_status, .now = now, .dyn_format = &dyn_format};
-
 
 	init_dyn(&files);
 	initialize_state(flags, directories_to_process, fileList, &first_dir);
@@ -171,9 +162,6 @@ void process_argument_files(
 	}
 }
 
-
-
-
 void process_directory(const char *dir, t_dyn *files,  t_stack **directories_to_process, bool first_dir, t_context *ctx) {
 	bool an_error = list_directory_helper(dir, files, directories_to_process, ctx);
 	if (!an_error && (first_dir || ctx->flags->bigR)){
@@ -181,8 +169,6 @@ void process_directory(const char *dir, t_dyn *files,  t_stack **directories_to_
 	}
 	display_sorted_files(an_error, files,  true, ctx);
 }
-
-
 
 bool list_directory_helper(const char *path, t_dyn *files, t_stack **directories_to_process, t_context *ctx)
 {
@@ -240,7 +226,7 @@ t_fileData	*create_fileData(const char *dir_path, struct dirent *entry, long *to
 	char *fullPath = ft_strjoin_multiple(dir_path, "/", entry->d_name, NULL);
 	file->absolutePath = fullPath; 
 	errno = 0;
-	get_fileInfo(fullPath,file,total_size,ctx/* ->flags, ctx->exit_status, ctx->now, ctx->dyn_format */);
+	get_fileInfo(fullPath,file,total_size,ctx);
 	return file;
 }
 
@@ -261,9 +247,7 @@ bool	handle_subdir(t_dyn *subdirs, t_fileData *file) {
 	return true;
 }
 
-bool handle_dir_open_error(const char *path) {
-	ft_printf_fd(1, "%s:\n", path);
-	ft_printf("total 0\n");
-	ft_printf_fd(2, "ft_ls: %s %s\n", path, strerror(errno));
+bool handle_dir_open_error(const char *path){
+	ft_printf_fd(2, "ft_ls: '%s': %s\n", path, strerror(errno));
 	return true;
 }
