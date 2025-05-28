@@ -237,7 +237,7 @@ void    get_fileInfo(const char* path, t_fileData *file,long *total_size,t_conte
 	}
 	fill_last_modified(file, &sfile, flag_label, ctx->now);
 	fill_symlink_target(path, file, ctx->exit_status);
-	//printf("taille pour %s | %ld\n", file->fileName, ft_strlen(file->fileName));
+	
 	
 	if ((result = ft_strlen(file->ownership.owner)) > ctx->dyn_format->max_owner_width) {
 		ctx->dyn_format->max_owner_width = result;
@@ -253,7 +253,6 @@ void    get_fileInfo(const char* path, t_fileData *file,long *total_size,t_conte
 		return;
 	} else 
 	if ((result = ft_strlen(file->fileName)) > ctx->dyn_format->max_name_width) {
-		//printf("taille pour %s | %ld\n", file->fileName, result);
 		ctx->dyn_format->max_name_width = result;
 	}
 } 

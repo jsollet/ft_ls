@@ -11,31 +11,6 @@
 /* ************************************************************************** */
 #include "libftprintf.h"
 
-/* void	ft_countflag(const char *inst, t_pgrm *fs)
-{
-	int	len;
-
-	if (fs->last.offset_w == 0 && fs->last.offset_p == 0)
-	len = fs->last.offset_c;
-	if (fs->last.offset_w == 0 && fs->last.offset_p != 0)
-	len = fs->last.offset_p;
-	if (fs->last.offset_w != 0)
-	len = fs->last.offset_w;
-	while (len)
-	{
-		if (*(inst + len) == '+')
-			fs->flag.plus++;
-		if (*(inst + len) == '-')
-			fs->flag.minus++;
-		if (*(inst + len) == '0')
-			fs->flag.zero++;
-		if (*(inst + len) == '#')
-			fs->flag.sharp++;
-		if (*(inst + len) == ' ')
-			fs->flag.space++;
-	len--;
-	}
-} */
 
 void	ft_countflag(const char *inst, t_pgrm *fs)
 {
@@ -49,14 +24,14 @@ void	ft_countflag(const char *inst, t_pgrm *fs)
 	else
 		len = fs->last.offset_w;
 
-	while (i < len)  // On parcourt depuis le début du format
+	while (i < len)
 	{
 		if (inst[i] == '+')
 			fs->flag.plus = 1;
 		else if (inst[i] == '-')
 			fs->flag.minus = 1;
 		else if (inst[i] == '0' && (i == 0 || !(inst[i - 1] >= '1' && inst[i - 1] <= '9')))
-			fs->flag.zero = 1;  // `0` est un flag SEULEMENT s'il est AVANT un nombre
+			fs->flag.zero = 1;
 		else if (inst[i] == '#')
 			fs->flag.sharp = 1;
 		else if (inst[i] == ' ')

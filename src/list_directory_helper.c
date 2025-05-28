@@ -54,7 +54,7 @@ static void handle_directories_loop(t_stack **directories_to_process,t_dyn *file
 	}
 }
 
-// utilisee sur getfileinfo je crois
+
 static void update_dynamic_format(t_fileData *file, t_dynamic_format *dyn_format)
 {
 	size_t len;

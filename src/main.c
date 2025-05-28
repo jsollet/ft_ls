@@ -91,7 +91,6 @@ bool    parse_flags(int argc, char *argv[], t_flags *flags){
 
 
 int main(int argc, char *argv[]) {
-	// Forcer la locale "C" pour éviter toute gestion locale spéciale
     t_stack *directories = NULL;
 	t_stack *files_argument = NULL;
 	t_stack *raw_argument = NULL;
@@ -106,9 +105,6 @@ int main(int argc, char *argv[]) {
 		set_exit_status(&exit_status, 2, NULL);
 		return exit_status.code;
 	}
-
-	
-	
 
 	for (int i = 1; i < argc; i++) {
 		if (i < double_dash_position && argv[i][0] == '-') continue;
@@ -125,7 +121,6 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	// Aucun chemin fourni → on ajoute "." par défaut
 	if (!path_was_given) {
 		process_path(&directories, &files_argument, ".", &exit_status);
 		has_valid_input = true;

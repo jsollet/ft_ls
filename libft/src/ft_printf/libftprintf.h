@@ -73,7 +73,7 @@ int		ft_issp(int c);
 int		ft_issw(int c);
 size_t	ft_atoi1(t_funcptr before, const char *str);
 // serie conversion numerique
-//int		power_10(int expo);
+
 int		cal(long long int i);
 int		calu(long long int i);
 void	ft_putnbr_1(int nb, t_n *a);
@@ -98,7 +98,7 @@ void	zero(t_pgrm *result);
 void	left_u(t_pgrm *result);
 void	right_ui(t_pgrm *result);
 void	left_i(t_pgrm *result);
-//void	right_i(t_pgrm *result);
+
 void	left_px(t_pgrm *result);
 void	right_px(t_pgrm *result);
 void	print_nf(char *c, t_pgrm *conversion);

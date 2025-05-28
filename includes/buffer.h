@@ -6,7 +6,7 @@
 #define INITIAL_CAPACITY 4
 
 typedef enum e_buf_mode {
-	BUF_STDOUT,             // printf
+	BUF_STDOUT,
 	BUF_STRING,             
 	BUF_DYNAMIC_STRING,     
     BUF_TO_FD, 
