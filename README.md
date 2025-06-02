@@ -42,6 +42,7 @@ Ces options sont propres à ce projet et peuvent ne pas exister dans `ls` GNU.
 ## ❗Limitation connue
 Certaines options GNU (ex: --sort, --group-directories-first, etc.) ne sont pas implémentées.
 Couleurs partiellement compatibles avec ls --color.
+
 Note : L'affichage des ACL et attributs étendus peut ne pas fonctionner si le projet est exécuté depuis un répertoire temporaire (ex. /tmp) ne supportant pas ces fonctionnalités. Tester dans un répertoire utilisateur standard est recommandé.
 
 
